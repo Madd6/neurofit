@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/genai": "^1.28.0",
     "@splinetool/react-spline": "^4.1.0",
     "next": "15.3.4",
     "next-auth": "^5.0.0-beta.29",

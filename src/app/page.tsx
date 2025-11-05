@@ -1,15 +1,20 @@
+import { auth } from "@/auth";
 import { SignOut } from "@/components/signin/SignOutBtn";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth()
+  // console.log("session", session?.user.id);
+  if (!session?.user) redirect('/login')
   return (
     <div>
+      <pre>{session.user.id}</pre>
       <nav>navbar</nav>
       <SignOut />
-      <main className="w-full min-h-screen flex justify-center items-center flex-wrap">
-        <div className="w-2/3 h-80 bg-blue-300 rounded-xl shadow-lg">a</div>
-        <div className="w-1/3 h-80 bg-blue-300 rounded-xl shadow-lg">b</div>
-        
-      </main>
+      Kalkulator Kebutuhan Kalori/Gizi <br />
+      Update personal info <br />
+      Rekomendasi Menu Makanan Sehat <br />
+      Rekomendasi Olahraga <br />
     </div>
   );
 }
