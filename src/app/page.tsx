@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
+import FormPersonalizeData from "@/components/form/FormPersonalizeData";
 import { SignOut } from "@/components/signin/SignOutBtn";
+import { ToggleTheme } from "@/components/toggleTheme";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -15,6 +17,8 @@ export default async function Home() {
       Update personal info <br />
       Rekomendasi Menu Makanan Sehat <br />
       Rekomendasi Olahraga <br />
+      <ToggleTheme />
+      <FormPersonalizeData/>
     </div>
   );
 }
