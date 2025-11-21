@@ -26,6 +26,7 @@ type FormFieldInput = {
     model: "input";
     type: string;
     title: string;
+    placeholder: string
 }
 
 type FormFieldConfig = FormFieldOption | FormFieldInput;
@@ -54,9 +55,9 @@ const FormUiReusable = ({step}: FormUiReusableProps) => {
     
     const stepOne: FormFieldConfig[] = [
         {value:"gender", model: "option", type: optionGender, title:"Gender"},
-        {value:"usia", model: "input", type: "number", title:"Usia"},
-        {value:"tinggiBadan", model: "input", type: "number", title:"Tinggi Badan"},
-        {value:"beratBadan", model: "input", type: "number", title:"Berat Badan"},
+        {value:"tanggalLahir", model: "input", type: "date", placeholder:"Masukkan Tanggal Lahir Anda", title:"Tanggal Lahir"},
+        {value:"tinggiBadan", model: "input", type: "number", placeholder:"Masukkan Tinggi Badan Anda", title:"Tinggi Badan (Cm)"},
+        {value:"beratBadan", model: "input", type: "number", placeholder:"Masukkan Berat Badan Anda", title:"Berat Badan (Kg)"},
     ]
     
     const stepTwo: FormFieldConfig[] = [
@@ -65,8 +66,8 @@ const FormUiReusable = ({step}: FormUiReusableProps) => {
     ]
     
     const stepThree: FormFieldConfig[] = [
-        {value:"RiwayatPenyakit", model: "input", type: "text", title:"Riwayat Penyakit"},
-        {value:"Alergi", model: "input", type: "text", title:"Alergi"},
+        {value:"riwayatPenyakit", model: "input", type: "text", placeholder:"Isi Jika memiliki Riwayat Penyakit",title:"Riwayat Penyakit"},
+        {value:"alergi", model: "input", type: "text", placeholder:"Isi Jika memiliki Alergi",title:"Alergi"},
     ]
     
     const uiToRender = step == 1 ? stepOne : step == 2 ? stepTwo : stepThree;
@@ -107,9 +108,16 @@ const FormUiReusable = ({step}: FormUiReusableProps) => {
                     <div className='w-full display flex flex-col justify-between' key={item.value}>
                         <label htmlFor={item.value}>{item.title}</label>
                         <input 
-                            {...register(item.value, item.type === 'number' ? { valueAsNumber: true } : {})}
+                            {...register(item.value,
+                                item.type === "number"
+                                ? { valueAsNumber: true }
+                                : item.type === "date"
+                                ? { valueAsDate: true }
+                                : {}
+                            )}
                             className='w-full border-2 p-2 rounded-lg shadow-lg bg-background text-foreground' 
                             type={item.type} 
+                            placeholder={item.placeholder}
                         />
                         {errors[item.value as keyof typeof errors] && (
                             <p className='text-red-500 text-sm mt-1'>
