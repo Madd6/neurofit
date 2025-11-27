@@ -4,20 +4,25 @@ import { GoogleGenAI } from "@google/genai";
 import { getMakronutrisi, getMenuMakanan, getPersonalData, insertRekomendasiMakanan } from "./supabaseFunc";
 import { objectSchemaMenuMakanan } from "@/types/schemaResponseAi";
 import { z } from "zod";
-const ai = new GoogleGenAI({apiKey: "AIzaSyBUz5KwIYy0EephxkRGuyRmmYKCBXMjfIo"});
+import { toast } from "sonner";
+const ai = new GoogleGenAI({apiKey: process.env.NEXT_API_OPENAI_KEY!});
 export async function getRekomendasiMakanan() {
     const session = await auth()
     if (!session?.user) throw new Error('User not authenticated');
     const userId = session.user.id;
-    const personalData = await getPersonalData(userId);
-    const makronutrisi = await getMakronutrisi(userId);
+    const res = await getPersonalData(userId);
+    const resMacro = await getMakronutrisi(userId);
 
-    if (!personalData || personalData.length === 0) {
-      throw new Error("Personal data not found");
+    if(!res.success || !res.data){
+        toast(res.msg)
+        return
     }
-    if (!makronutrisi || makronutrisi.length === 0) {
-      throw new Error("Makronutrisi data not found");
+    const personalData = res.data
+    if(!resMacro.success || !resMacro.data){
+          toast(resMacro.msg)
+          return
     }
+    const makronutrisi = resMacro.data
     const p = personalData[0];
     const m = makronutrisi[0];
     const prompt =`
@@ -77,15 +82,15 @@ export async function getRekomendasiMakanan() {
         ],config: {
           responseMimeType: "application/json",
           responseJsonSchema: z.toJSONSchema(objectSchemaMenuMakanan),
-          temperature: 0.2,
+          // temperature: 0.2,
         }
       });
-      if(!response.text) throw new Error("AI response is empty");
+      if(!response.text) return { success: false, data: null,msg: "Gagal Mendapat response" };
       const parseResult = objectSchemaMenuMakanan.safeParse(JSON.parse(response.text));
-      if (!parseResult.success) throw new Error("Failed to parse AI response");
+      if (!parseResult.success) return { success: false, data:null, msg:"gagal parse" };
       const menuMakanan = await getMenuMakanan(userId); //cek menu lama
-      if(menuMakanan){
+      if(!menuMakanan){
         insertRekomendasiMakanan(parseResult.data)
       }
-      return(parseResult.data);
+      return { success: true, data: parseResult.data, msg:"success" }
 }

@@ -1,8 +1,56 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Orbitron } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/themeProvider";
+import MyNav from "@/components/MyNav";
+import { Toaster } from "sonner";
 
+export const nexusBold = localFont({
+  src: [
+    {
+      path: '../assets/fonts/nexus/Nexusbold Regular.otf',
+      style: 'normal',
+    },
+    {
+      path: '../assets/fonts/nexus/Nexusbold Regularitalic.otf',
+      style: 'italic',
+    },
+    {
+      path: '../assets/fonts/nexus/Nexusbold Roundeditalic.otf',
+      style: 'text-rounded italic',
+    },
+    {
+      path: '../assets/fonts/nexus/Nexusbold Rounded.otf',
+      style: 'text-rounded',
+    },
+  ],
+})
+export const sterion = localFont({
+  src: [
+    {
+      path: '../assets/fonts/sterion/Sterion-BLLld.ttf',
+      style: 'normal',
+    },
+    {
+      path: '../assets/fonts/sterion/SterionItalic-R99PA.ttf',
+      style: 'italic',
+    },
+  ],
+})
+
+export const AudioWide = localFont({
+  src:[
+    {
+      path: '../assets/fonts/AudioWide/AudioWide-Regular.ttf',
+    }
+  ]
+});
+export const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-orbitron",
+});
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,7 +74,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable}   antialiased`}
       >
         <ThemeProvider
             attribute="class"
@@ -34,7 +82,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <MyNav />
             {children}
+            <Toaster />
           </ThemeProvider>
       </body>
     </html>

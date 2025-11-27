@@ -40,19 +40,26 @@ export const objectSchemaMenuMakanan = z.object(
 export const SchemaRekomendasiOlahraga = z.array(
         z.object({
             hari:z.enum(["senin","selasa","rabu","kamis","jumat","sabtu","minggu"]).describe("hari dalam seminggu"),
-            kategori: z.enum(["kardio" , "gym" , "calisthenics"]).describe("kategori olahraga"),
+            kategori: z.enum(["kardio" , "gym" , "calisthenics","rest"]).describe("kategori olahraga"),
             durasi: z.number().describe("durasi latihan dalam menit"),
-            latihan: z.array(
+            detailLatihan: z.array(
                 z.object({
                     nama: z.string().describe("nama latihan"),
                     set: z.number().describe("jumlah set latihan"),
                     repetisi: z.string().describe("jumlah repetisi atau durasi latihan"),
                 })
             ),
+            intensitas: z.enum(["ringan" , "sedang" , "berat"]).describe("intensitas latihan"),
             catatan: z.string().describe("catatan atau tips tambahan untuk latihan hari tersebut"),
         })
     );
-
+export const schemaDetailLatihan = z.array(
+                z.object({
+                    nama: z.string().describe("nama latihan"),
+                    set: z.number().describe("jumlah set latihan"),
+                    repetisi: z.string().describe("jumlah repetisi atau durasi latihan"),
+                })
+            )
 
 export type schemaMakronutrisi = z.infer<typeof objectSchemaMakronutrisi>;
 export type SchemaMenuMakanan = z.infer<typeof objectSchemaMenuMakanan>;

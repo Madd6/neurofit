@@ -8,19 +8,19 @@ import { insertPersonalData } from '@/action/supabaseFunc'
 import { FormData,formSchema } from '@/types/schemaPersonalizeData'
 
 
-const FormPersonalizeData = () => {
+const FormPersonalizeData = (personaldata:FormData |null) => {
     const methods = useForm<FormData>({
         resolver: zodResolver(formSchema),
         mode: 'onChange',
         defaultValues: {
-            gender: '',
-            tanggalLahir: undefined,
-            tinggiBadan: undefined,
-            beratBadan: undefined,
-            activityFactor: '',
-            goal: '',
-            riwayatPenyakit: '',
-            alergi: '',
+            gender: personaldata?.gender || '',
+            tanggalLahir: personaldata?.tanggalLahir || undefined,
+            tinggiBadan: personaldata?.tinggiBadan || undefined,
+            beratBadan: personaldata?.beratBadan || undefined,
+            activityFactor: String(personaldata?.activityFactor) || '',
+            goal: personaldata?.goal || '',
+            riwayatPenyakit: personaldata?.riwayatPenyakit || '',
+            alergi: personaldata?.alergi || '',
         }
     });
     const { handleSubmit, trigger} = methods;
@@ -69,7 +69,7 @@ const FormPersonalizeData = () => {
                 {progressLabel.map((item, index) => (
                     <div className='flex flex-1/3 justify-center items-center flex-col gap-2' key={index}>
                         <div className='w-6 h-6 rounded-full bg-secondary'>
-                            {index<step && (<div className='w-6 h-6 rounded-full bg-amber-400 '></div>)}
+                            {index<step && (<div className='w-6 h-6 rounded-full bg-gradient-to-br from-violet-700 via-cyan-400 to-lime-400 '></div>)}
                         </div>
                         <span className="text-sm font-medium text-center md:h-12 h-24 py-4 text-secondary-foreground">{item}</span>
                     </div>
@@ -78,7 +78,7 @@ const FormPersonalizeData = () => {
                 
             </div>
             <div className='h-1.5 w-full bg-secondary rounded-xl mt-2'>
-                <div className={`w-${step}/3 bg-amber-400 h-1.5 rounded-xl`}></div>
+                <div className={`w-${step}/3 bg-gradient-to-br from-violet-700 via-cyan-400 to-lime-400 h-1.5 rounded-xl`}></div>
             </div>
         </div>
         <FormProvider {...methods}>

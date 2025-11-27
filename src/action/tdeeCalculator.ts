@@ -8,7 +8,7 @@ import { z } from "zod";
 // import { zodToJsonSchema } from "zod-to-json-schema";
 // import { FormData } from "@/types/schemaPersonalizeData";
 
-const ai = new GoogleGenAI({apiKey: "AIzaSyBUz5KwIYy0EephxkRGuyRmmYKCBXMjfIo"});
+const ai = new GoogleGenAI({apiKey: process.env.NEXT_API_OPENAI_KEY!});
 
 function getAge(birthDate: string | Date): number {
   const b = new Date(birthDate);
