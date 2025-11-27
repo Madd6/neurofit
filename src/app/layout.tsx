@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/themeProvider";
 import MyNav from "@/components/MyNav";
 import { Toaster } from "sonner";
+import InternetGate from "@/components/deteksiInternet";
 
 export const nexusBold = localFont({
   src: [
@@ -83,8 +84,11 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <MyNav />
-            {children}
-            <Toaster />
+            <InternetGate>
+              
+              <Toaster />
+              {children}
+            </InternetGate>
           </ThemeProvider>
       </body>
     </html>

@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import MyNav from "@/components/MyNav";
 import { toast } from "sonner";
+import { OneShotToast } from "@/components/OneShootToast";
+import ToastButton from "@/components/toastButton";
 
 const hitungBMI = async({tinggiBadan,beratBadan}:{tinggiBadan:number,beratBadan:number} ) =>{
   const tinggiDalamMeter = tinggiBadan / 100;
@@ -53,8 +55,17 @@ export default async function Home() {
   const personalInfo = res.data
   const resMacro = await getMakronutrisi(userId!);
   if(!resMacro.success || !resMacro.data){
-      toast(resMacro.msg)
-      return
+      
+      return(
+            <div className="w-full min-h-screen flex flex-col justify-center items-center gap-2">
+              {/* ini client component yang bakal panggil toast */}
+              <OneShotToast message={resMacro.msg || "Gagal mengambil data Makronutrisi"} />
+      
+              <p className="text-sm text-red-400">
+                Gagal memuat Makronutrisi. Coba lagi nanti.
+              </p>
+            </div>
+          )
   }
   const macro = resMacro.data
   const age = getAge(personalInfo?personalInfo[0].tanggalLahir:null);
@@ -115,6 +126,7 @@ export default async function Home() {
                   Edit Profile
                 </div>
               </Link>
+              {/* <ToastButton /> */}
             </div>
           </div>
           <div className="w-full h-[30%] flex justify-between items-center pt-4 ">

@@ -28,6 +28,7 @@ const MyNav = async () => {
         }}>
             <div className={`text-xl font-bold text-foreground bg-gradient-to-br from-cyan-400 to-violet-700 ${AudioWide.className}`} >Neurofit</div>
         </Link>
+        
         <div className="flex justify-end items-center gap-2 bg-gradient-to-br from-cyan-400 to-violet-700 p-2 text-foreground w-[120px] h-[45px]" style={{
             clipPath:'path("M 0,0 L 120,0 L 120,45 L 30,45 L 20,40 L 0,0 Z")'
         }}>

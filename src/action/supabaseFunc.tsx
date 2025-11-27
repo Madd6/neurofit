@@ -42,7 +42,7 @@ export async function insertPersonalData(
 
   console.log("Personal data inserted successfully")
   // bisa juga return row supabase, tapi untuk simple pakai formData
-  return { success: true, data: formData }
+  return { success: true, data: formData, msg: "Personal data inserted successfully" }
 }
 
 export async function getPersonalData(

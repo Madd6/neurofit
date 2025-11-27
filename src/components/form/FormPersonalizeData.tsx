@@ -6,6 +6,8 @@ import FormUiReusable from './FormUiReusable'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { insertPersonalData } from '@/action/supabaseFunc'
 import { FormData,formSchema } from '@/types/schemaPersonalizeData'
+import { toast } from 'sonner'
+import { redirect } from 'next/navigation'
 
 
 const FormPersonalizeData = (personaldata:FormData |null) => {
@@ -38,7 +40,14 @@ const FormPersonalizeData = (personaldata:FormData |null) => {
     }
     const onSubmit: SubmitHandler<FormData> = async(data) => {
         // console.log(data);
-        insertPersonalData(data);
+        const res = await insertPersonalData(data);
+        if(!res.success || !res.data){
+            toast(res.msg)
+        }
+        if(res.success || res.data){
+            toast.success(res.msg)
+        }
+        redirect("/")
     }
     const handleNextStep = async(event: FormEvent<HTMLButtonElement>) => {
         event.preventDefault();
