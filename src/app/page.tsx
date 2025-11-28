@@ -1,4 +1,4 @@
-import { getMakronutrisi, getPersonalData } from "@/action/supabaseFunc";
+import {  getPersonalData } from "@/action/supabaseFunc";
 import { auth } from "@/auth";
 import Image from "next/image";
 import illustrationFitness from '../assets/freepik__background__65885.png';
