@@ -22,6 +22,7 @@ interface CardMacroProps {
 
 const CardMacro = (props: CardMacroProps) => {
   const [isLoading,setIsLoading] = useState(false)
+  const [initialData,setInitialData] = useState<CardMacroProps>(props)
   const handleTdeeCalculator = async () => {
     setIsLoading(true)
     const res = await tdeeCalculator();
@@ -31,15 +32,16 @@ const CardMacro = (props: CardMacroProps) => {
       return;
     }
     setIsLoading(false)
+    setInitialData(res.data)
     toast.success(res.msg || "Berhasil menghitung TDEE");
 
   };
 
   const isEmpty =
-    props.protein === null ||
-    props.karbohidrat === null ||
-    props.lemak === null ||
-    props.targetKalori === null;
+    initialData.protein === null ||
+    initialData.karbohidrat === null ||
+    initialData.lemak === null ||
+    initialData.targetKalori === null;
 
   // ✅ Kalau belum ada data makro → tampilkan tombol hitung TDEE
   if (isEmpty) {
@@ -96,25 +98,25 @@ const CardMacro = (props: CardMacroProps) => {
         </CardHeader>
         <CardContent>
           <ChartRadarDefault
-            protein={props.protein!}
-            lemak={props.lemak!}
-            karbohidrat={props.karbohidrat!}
+            protein={initialData.protein!}
+            lemak={initialData.lemak!}
+            karbohidrat={initialData.karbohidrat!}
           />
           <div className="bg-background/60 p-4 rounded-xl my-4">
-            <p className="text-cyan-400 text-lg font-bold">{props.targetKalori} kcal</p>
+            <p className="text-cyan-400 text-lg font-bold">{initialData.targetKalori} kcal</p>
             <p className="text-gray-400 text-sm">Target Kalori</p>
 
             <div className="flex gap-6 mt-4">
               <div className="text-center">
-                <p className="text-cyan-300 text-sm font-bold">{props.protein} gr</p>
+                <p className="text-cyan-300 text-sm font-bold">{initialData.protein} gr</p>
                 <p className="text-gray-400 text-xs">Protein</p>
               </div>
               <div className="text-center">
-                <p className="text-purple-400 text-sm font-bold">{props.lemak} gr</p>
+                <p className="text-purple-400 text-sm font-bold">{initialData.lemak} gr</p>
                 <p className="text-gray-400 text-xs">Fat</p>
               </div>
               <div className="text-center">
-                <p className="text-lime-400 text-sm font-bold">{props.karbohidrat} gr</p>
+                <p className="text-lime-400 text-sm font-bold">{initialData.karbohidrat} gr</p>
                 <p className="text-gray-400 text-xs">Carbs</p>
               </div>
             </div>
