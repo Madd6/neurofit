@@ -1,6 +1,8 @@
 import NextAuth, { DefaultSession } from "next-auth"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
+import { createClient } from "./utils/supabase/server"
+import { redirect } from "next/navigation"
 
 // ✅ Minimal DB function - hanya sinkronisasi user ID
 async function syncUserToDb(userData: {
@@ -12,22 +14,36 @@ async function syncUserToDb(userData: {
 }) {
   try {
     // ✅ Simple upsert - hanya basic info
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users`, {
-      method: 'POST',
-      headers: {
-        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify({
+    const supabase = await createClient()
+    const response = await supabase
+    .from("personalInfo")
+    .upsert({
         id: userData.id,
         email: userData.email,
         name: userData.name,
         image: userData.image,
         provider: userData.provider,
-      })
+      }, {
+      onConflict: "userId",
+      ignoreDuplicates: false,
     })
-    return response.ok
+    .select()
+    // const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    //     'Content-Type': 'application/json',
+    //     'Prefer': 'resolution=merge-duplicates'
+    //   },
+    //   body: JSON.stringify({
+    //     id: userData.id,
+    //     email: userData.email,
+    //     name: userData.name,
+    //     image: userData.image,
+    //     provider: userData.provider,
+    //   })
+    // })
+    return response
   } catch (error) {
     console.error('Sync error:', error)
     return false
@@ -70,6 +86,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         })
       }
       return true
+      // redirect('/FormIsiDataDiri')
     },
 
     async jwt({ token, account, profile }) {
