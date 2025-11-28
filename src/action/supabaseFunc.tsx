@@ -138,7 +138,6 @@ export async function getMakronutrisi(
 
   const typedData = (data ?? []) as MakronutrisiRow[]
 
-  console.log("makronutrisi selected successfully")
   return {
     success: true,
     data: typedData.map((row) => {

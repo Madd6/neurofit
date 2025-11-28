@@ -10,7 +10,7 @@ import { orbitron, sterion } from "./layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Dumbbell } from "lucide-react";
-// import CardMacroWrapper from "@/components/cardMacroWrapper";
+import CardMacroWrapper from "@/components/cardMacroWrapper";
 
 const hitungBMI = async({tinggiBadan,beratBadan}:{tinggiBadan:number,beratBadan:number} ) =>{
   const tinggiDalamMeter = tinggiBadan / 100;
@@ -174,7 +174,7 @@ export default async function Home() {
           </div>
         </div>
       </div>
-        {/* <CardMacroWrapper /> */}
+        <CardMacroWrapper />
     </div>
   );
 }
