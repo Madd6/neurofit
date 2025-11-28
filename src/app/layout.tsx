@@ -43,7 +43,7 @@ export const sterion = localFont({
 export const AudioWide = localFont({
   src:[
     {
-      path: '../assets/fonts/Audiowide/AudioWide-Regular.ttf',
+      path: '../assets/fonts/Audiowide/Audiowide-Regular.ttf',
     }
   ]
 });
