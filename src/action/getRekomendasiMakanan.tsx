@@ -4,23 +4,33 @@ import { GoogleGenAI } from "@google/genai";
 import { getMakronutrisi, getMenuMakanan, getPersonalData, insertRekomendasiMakanan } from "./supabaseFunc";
 import { objectSchemaMenuMakanan } from "@/types/schemaResponseAi";
 import { z } from "zod";
-import { toast } from "sonner";
 const ai = new GoogleGenAI({apiKey: process.env.NEXT_API_OPENAI_KEY!});
 export async function getRekomendasiMakanan() {
     const session = await auth()
-    if (!session?.user) throw new Error('User not authenticated');
+    if (!session?.user) {
+      return ({
+          success: false,
+          msg:"Login terlebih dahulu"
+        })
+    };
     const userId = session.user.id;
     const res = await getPersonalData(userId);
     const resMacro = await getMakronutrisi(userId);
 
     if(!res.success || !res.data){
-        toast(res.msg)
-        return
+        return{
+            success: false,
+            data: null,
+            msg: "gagal mendapatkan personal data , silakan isi personal data anda"
+          }
     }
     const personalData = res.data
     if(!resMacro.success || !resMacro.data){
-          toast(resMacro.msg)
-          return
+          return{
+            success: false,
+            data: null,
+            msg: "gagal mendapatkan makronutrisi , silakan coba lagi nanti."
+          }
     }
     const makronutrisi = resMacro.data
     const p = personalData[0];
@@ -68,29 +78,52 @@ export async function getRekomendasiMakanan() {
         8. jangan rekomendasikan makanan dengan gula yang tinggi
         9. waktu makan harus tetap setiap harinya (misal: sarapan, makan siang, makan malam, snack pagi, snack sore)
     `
+    try {
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ],config: {
-          responseMimeType: "application/json",
-          responseJsonSchema: z.toJSONSchema(objectSchemaMenuMakanan),
-          // temperature: 0.2,
-        }
-      });
-      if(!response.text) return { success: false, data: null,msg: "Gagal Mendapat response" };
-      const parseResult = objectSchemaMenuMakanan.safeParse(JSON.parse(response.text));
-      if (!parseResult.success) return { success: false, data:null, msg:"gagal parse" };
-      const menuMakanan = await getMenuMakanan(userId); //cek menu lama
-      if(!menuMakanan){
-        insertRekomendasiMakanan(parseResult.data)
-      }
-      return { success: true, data: parseResult.data, msg:"success" }
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: z.toJSONSchema(objectSchemaMenuMakanan),
+      },
+    });
+
+    if (!response.text) {
+      return { success: false, data: null, msg: "Gagal mendapatkan response text dari AI." };
+    }
+
+    // Parsing response
+    const parseResult = objectSchemaMenuMakanan.safeParse(JSON.parse(response.text));
+    if (!parseResult.success) {
+      return { success: false, data: null, msg: "Gagal parsing JSON sesuai schema rekomendasi makanan." };
+    }
+    // ---- Cek rekomendasi lama di database ----
+    const menuMakanan = await getMenuMakanan(userId); //cek menu lama
+    if (!menuMakanan.success || menuMakanan.data?.length === 0 ||menuMakanan.data === null ) {
+      await insertRekomendasiMakanan(parseResult.data);
+      
+      return { 
+        success: true, 
+        data: parseResult.data, 
+        msg: "success insert ke database" 
+      };
+    }
+
+    // Return ke UI
+    return { success: true, data: parseResult.data, msg: "success" };
+
+  } catch (err) {
+
+    return {
+      success: false,
+      data: null,
+      msg: "Service AI sedang overload atau quota habis, silakan coba lagi nanti.",
+      err:err
+    };
+  }
 }

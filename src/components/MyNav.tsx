@@ -13,13 +13,11 @@ import { AudioWide } from '@/app/layout';
 import { SignOut } from './signin/SignOutBtn';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Button } from './ui/button';
-import { icons, User } from 'lucide-react';
+import {  User } from 'lucide-react';
 
 const MyNav = async () => {
     const session = await auth()
       console.log("session home", session);
-      const userId = session?.user.id;
       const userImage = session?.user.image ?? "";
   return (
     <div className="absolute top-0 left-0 -translate-y-0.5 flex items-center gap-4 justify-between w-full z-[9999]">
@@ -47,9 +45,11 @@ const MyNav = async () => {
                 </DropdownMenuContent>
             </DropdownMenu>
             :
-            <div className='size-9 rounded-sm overflow-hidden border-2 shadow-sm shadow-gray-800 flex justify-center items-center'>
-                <User /> 
-            </div>
+            <Link href={'/login'} className='cursor-pointer'>
+                <div className='size-9 rounded-sm overflow-hidden border-2 shadow-sm shadow-gray-800 flex justify-center items-center'>
+                    <User /> 
+                </div>
+            </Link>
             }
         </div>
     </div>

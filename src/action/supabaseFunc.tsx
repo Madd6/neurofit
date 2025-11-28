@@ -16,6 +16,25 @@ type ActionResult<T = undefined> = {
   msg?: string
 }
 
+// ---- Tipe row untuk tabel Supabase ----
+type PersonalInfoRow = FormData & {
+  userId: string
+}
+
+type MakronutrisiRow = schemaMakronutrisi & {
+  userId: string
+}
+
+type RekomendasiMakananRow = {
+  userId: string
+  menuMakanan: SchemaMenuMakanan
+}
+
+type RekomendasiOlahragaRow = {
+  userId: string
+  detailLatihan: rekomendasiOlahragaSchema
+}
+
 // ================== PERSONAL DATA ==================
 
 export async function insertPersonalData(
@@ -25,7 +44,7 @@ export async function insertPersonalData(
   if (!session?.user) throw new Error("User not authenticated")
 
   const userId = session.user.id
-  const dataToInsert = { userId, ...formData }
+  const dataToInsert: PersonalInfoRow = { userId, ...formData }
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -41,13 +60,16 @@ export async function insertPersonalData(
   }
 
   console.log("Personal data inserted successfully")
-  // bisa juga return row supabase, tapi untuk simple pakai formData
-  return { success: true, data: formData, msg: "Personal data inserted successfully" }
+  return {
+    success: true,
+    data: formData,
+    msg: "Personal data inserted successfully",
+  }
 }
 
 export async function getPersonalData(
   userId: string
-): Promise<ActionResult<any[]>> {
+): Promise<ActionResult<FormData[]>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -59,8 +81,17 @@ export async function getPersonalData(
     return { success: false, msg: error.message }
   }
 
+  // cast terkontrol → tidak pakai any
+  const typedData = (data ?? []) as PersonalInfoRow[]
+
   console.log("Personal data selected successfully")
-  return { success: true, data: data ?? [] }
+  return {
+    success: true,
+    data: typedData.map((row) => {
+      const {  ...rest } = row
+      return rest
+    }),
+  }
 }
 
 // ================== MAKRONUTRISI ==================
@@ -72,7 +103,7 @@ export async function insertMakronutrisi(
   if (!session?.user) throw new Error("User not authenticated")
 
   const userId = session.user.id
-  const dataToInsert = { userId, ...macros }
+  const dataToInsert: MakronutrisiRow = { userId, ...macros }
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -93,7 +124,7 @@ export async function insertMakronutrisi(
 
 export async function getMakronutrisi(
   userId: string
-): Promise<ActionResult<any[]>> {
+): Promise<ActionResult<schemaMakronutrisi[]>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -105,8 +136,16 @@ export async function getMakronutrisi(
     return { success: false, msg: error.message }
   }
 
+  const typedData = (data ?? []) as MakronutrisiRow[]
+
   console.log("makronutrisi selected successfully")
-  return { success: true, data: data ?? [] }
+  return {
+    success: true,
+    data: typedData.map((row) => {
+      const {  ...rest } = row
+      return rest
+    }),
+  }
 }
 
 // ================== REKOMENDASI MAKANAN ==================
@@ -118,7 +157,10 @@ export async function insertRekomendasiMakanan(
   if (!session?.user) throw new Error("User not authenticated")
 
   const userId = session.user.id
-  const dataToInsert = { userId, menuMakanan: { ...menu } }
+  const dataToInsert: RekomendasiMakananRow = {
+    userId,
+    menuMakanan: { ...menu },
+  }
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -130,29 +172,34 @@ export async function insertRekomendasiMakanan(
     .select()
 
   if (error) {
-    return { success: false, msg:error.message }
+    return { success: false, msg: error.message }
   }
 
   console.log("rekomendasiMakanan inserted successfully")
-  return { success: true, data: menu, msg:"success" }
+  return { success: true, data: menu, msg: "success" }
 }
 
 export async function getMenuMakanan(
   userId: string
-): Promise<ActionResult<any[]>> {
+): Promise<ActionResult<SchemaMenuMakanan[]>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("rekomendasiMakanan")
-    .select()
+    .select("menuMakanan")
     .eq("userId", userId)
 
   if (error) {
     return { success: false, msg: error.message }
   }
 
+  const rows = (data ?? []) as { menuMakanan: SchemaMenuMakanan }[]
+
   console.log("rekomendasiMakanan selected successfully")
-  return { success: true, data: data ?? [] }
+  return {
+    success: true,
+    data: rows.map((row) => row.menuMakanan),
+  }
 }
 
 // ================== REKOMENDASI OLAHRAGA ==================
@@ -164,7 +211,10 @@ export async function insertRekomendasiOlahraga(
   if (!session?.user) throw new Error("User not authenticated")
 
   const userId = session.user.id
-  const dataToInsert = { userId, detailLatihan: { ...latihan } }
+  const dataToInsert: RekomendasiOlahragaRow = {
+    userId,
+    detailLatihan: { ...latihan },
+  }
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -185,19 +235,23 @@ export async function insertRekomendasiOlahraga(
 
 export async function getDetailLatihan(
   userId: string
-): Promise<ActionResult<any[]>> {
+): Promise<ActionResult<rekomendasiOlahragaSchema | null>> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("rekomendasiOlahraga")
-    .select()
+    .select("detailLatihan")
     .eq("userId", userId)
     .single()
 
   if (error) {
     return { success: false, msg: error.message }
   }
-  console.log(data.detailLatihan)
 
-  return { success: true, data: data.detailLatihan ?? [] }
+  const detailLatihan = (data?.detailLatihan ??
+    null) as rekomendasiOlahragaSchema | null
+
+  console.log(detailLatihan)
+
+  return { success: true, data: detailLatihan }
 }

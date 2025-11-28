@@ -9,8 +9,11 @@ import { FormData,formSchema } from '@/types/schemaPersonalizeData'
 import { toast } from 'sonner'
 import { redirect } from 'next/navigation'
 
+interface CardMenuMakananProps {
+  personaldata?: FormData | null;
+}
 
-const FormPersonalizeData = (personaldata:FormData |null) => {
+const FormPersonalizeData = ({personaldata}:CardMenuMakananProps) => {
     const methods = useForm<FormData>({
         resolver: zodResolver(formSchema),
         mode: 'onChange',
@@ -52,7 +55,7 @@ const FormPersonalizeData = (personaldata:FormData |null) => {
     const handleNextStep = async(event: FormEvent<HTMLButtonElement>) => {
         event.preventDefault();
         const fieldsToValidate = stepFields[step as keyof typeof stepFields];
-
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const isValid = await trigger(fieldsToValidate as any);
 
         if (!isValid) {

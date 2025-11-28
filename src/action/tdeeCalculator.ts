@@ -28,15 +28,23 @@ function getAge(birthDate: string | Date): number {
 
 async function tdeeCalculator() {
   const session = await auth()
-  if (!session?.user) throw new Error('User not authenticated');
+  if (!session?.user){
+    return ({
+          success: false,
+          msg:"Login terlebih dahulu"
+        })
+  };
   const userId = session.user.id;
-  const personalData = await getPersonalData(userId);
+  const res = await getPersonalData(userId);
 
-  if (!personalData || personalData.length === 0) {
-    throw new Error("Personal data not found");
+  if (!res.success || !res.data) {
+    return ({
+      success: false,
+      msg:"gagal mendapatkan personal data"
+    })
   }
 
-  const p = personalData[0];
+  const p = res.data[0];
 
   const age = getAge(p.tanggalLahir);
 
@@ -92,27 +100,47 @@ INSTRUKSI PERHITUNGAN
    - Boleh bulatkan semua nilai kalori dan gram ke angka bulat terdekat.
 `
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: prompt
-          }
-        ]
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }]
+        }
+      ],
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: z.toJSONSchema(objectSchemaMakronutrisi),
+        temperature: 0.2,
       }
-    ],config: {
-      responseMimeType: "application/json",
-      responseJsonSchema: z.toJSONSchema(objectSchemaMakronutrisi),
-      temperature: 0.2,
+    });
+
+    // ✅ Kirim error ke UI, bukan throw
+    if (!response.text) {
+      return { success: false, data: null, msg: "AI response kosong (tidak ada text JSON)." };
     }
-  });
-  if(!response.text) throw new Error("AI response is empty");
-  const parseResult = objectSchemaMakronutrisi.safeParse(JSON.parse(response.text));
-  if (!parseResult.success) throw new Error("Failed to parse AI response");
-  insertMakronutrisi(parseResult.data)
-  return(response.text);
+
+    // ✅ Parsing aman
+    const parseResult = objectSchemaMakronutrisi.safeParse(JSON.parse(response.text));
+    if (!parseResult.success) {
+      return { success: false, data: null, msg: "Gagal parsing JSON sesuai schema makronutrisi." };
+    }
+
+
+    await insertMakronutrisi(parseResult.data);
+
+    // ✅ Kembalikan data hasil AI ke UI
+    return { success: true, data: parseResult.data, msg: "success" };
+
+  } catch (err) {
+    console.error("Gemini API error:", err);
+
+    return {
+      success: false,
+      data: null,
+      msg: "Gateway AI bermasalah (overload / quota habis / rate limit)."
+    };
+  }
 }
  export default tdeeCalculator;

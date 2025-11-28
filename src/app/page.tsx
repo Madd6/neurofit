@@ -1,23 +1,17 @@
 import { getMakronutrisi, getPersonalData } from "@/action/supabaseFunc";
 import { auth } from "@/auth";
 import CardMacro from "@/components/CardMacro";
-import { SignOut } from "@/components/signin/SignOutBtn";
-import { ToggleTheme } from "@/components/toggleTheme";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import illustrationFitness from '../assets/freepik__background__65885.png';
-import xxxx from '../assets/XXXX.png';
 import INI from '../assets/INI.png';
 import molekulLine from '../assets/freepik__background__47176.png';
 import japaneseText from '../assets/freepik__background__7492.png';
 import futuristicIcon from '../assets/futuristicIcon.svg';
-import { AudioWide, nexusBold, orbitron, sterion } from "./layout";
+import { orbitron, sterion } from "./layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import MyNav from "@/components/MyNav";
-import { toast } from "sonner";
 import { OneShotToast } from "@/components/OneShootToast";
-import ToastButton from "@/components/toastButton";
+import { Dumbbell } from "lucide-react";
 
 const hitungBMI = async({tinggiBadan,beratBadan}:{tinggiBadan:number,beratBadan:number} ) =>{
   const tinggiDalamMeter = tinggiBadan / 100;
@@ -44,32 +38,22 @@ function getAge(birthDate: string | Date): number {
 export default async function Home() {
   const session = await auth()
   console.log("session home", session);
-  if (!session?.user) redirect('/login')
-  const userId = session.user.id;
-  const userImage = session.user.image ?? "";
+  const userId = session?.user.id;
   const res = await getPersonalData(userId!);
-  if (!res.success || !res.data) {
-    redirect('/FormIsiDataDiri')
-    return
-  }
   const personalInfo = res.data
   const resMacro = await getMakronutrisi(userId!);
   if(!resMacro.success || !resMacro.data){
-      
-      return(
-            <div className="w-full min-h-screen flex flex-col justify-center items-center gap-2">
-              {/* ini client component yang bakal panggil toast */}
-              <OneShotToast message={resMacro.msg || "Gagal mengambil data Makronutrisi"} />
-      
-              <p className="text-sm text-red-400">
-                Gagal memuat Makronutrisi. Coba lagi nanti.
-              </p>
-            </div>
-          )
+    <OneShotToast message={resMacro.msg || "Gagal mengambil data Makronutrisi"} />
   }
   const macro = resMacro.data
-  const age = getAge(personalInfo?personalInfo[0].tanggalLahir:null);
-  
+  const age = getAge(personalInfo?.[0]?.tanggalLahir ?? "2025-01-01");
+  const bmi = personalInfo && personalInfo.length > 0
+  ? await hitungBMI({
+      tinggiBadan: personalInfo[0].tinggiBadan,
+      beratBadan: personalInfo[0].beratBadan
+    })
+  : null;
+
   return (
     <div className={`flex md:flex-row flex-col items-center justify-center w-full min-h-screen relative md:overflow-y-hidden ${orbitron.className}`}>
       
@@ -80,42 +64,50 @@ export default async function Home() {
        " >
           <div className="w-full md:h-[70%] h-[55%]  bg-card rounded-xl px-2">
             <div className={`w-full text-end px-4 py-4  font-semibold `}>Profil User</div>
-            {
-              personalInfo && (
-                  <div className="bg-background/50 rounded-xl p-4 ">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="opacity-70 text-xs">Usia</span>
-                        <span className="font-bold text-cyan-400 ">{age} </span>
-                      </div>
-
-                      <div className="flex justify-between text-sm">
-                        <span className="opacity-70 text-xs">Gender</span>
-                        <span className="font-bold text-cyan-400 ">{personalInfo[0].gender}</span>
-                      </div>
-
-                      <div className="flex justify-between text-sm">
-                        <span className="opacity-70 text-xs">Tinggi</span>
-                        <span className="font-bold text-cyan-400 ">{personalInfo[0].tinggiBadan} cm</span>
-                      </div>
-
-                      <div className="flex justify-between text-sm">
-                        <span className="opacity-70 text-xs">Berat</span>
-                        <span className="font-bold text-cyan-400 ">{personalInfo[0].beratBadan} kg</span>
-                      </div>
-
-                      {hitungBMI({tinggiBadan: personalInfo[0].tinggiBadan, beratBadan: personalInfo[0].beratBadan}).then((bmi) => (
-                        <div className="flex justify-between text-sm">
-                          <span className="opacity-70 text-xs">BMI</span>
-                          <span className="font-bold text-cyan-400 ">{bmi}</span>
-                        </div>
-                      ))}
-
-                    </div>
+            {personalInfo && personalInfo.length > 0 ? (
+              <div className="bg-background/50 rounded-xl p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="opacity-70 text-xs">Usia</span>
+                    <span className="font-bold text-cyan-400">{age}</span>
                   </div>
-              )
-            }
-            <div className="w-full h-15 flex justify-between items-center px-4 py-2">
+
+                  <div className="flex justify-between">
+                    <span className="opacity-70 text-xs">Gender</span>
+                    <span className="font-bold text-cyan-400">{personalInfo[0].gender}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="opacity-70 text-xs">Tinggi</span>
+                    <span className="font-bold text-cyan-400">{personalInfo[0].tinggiBadan} cm</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="opacity-70 text-xs">Berat</span>
+                    <span className="font-bold text-cyan-400">{personalInfo[0].beratBadan} kg</span>
+                  </div>
+
+                  {/* ✅ BMI sudah dihitung di atas, tinggal tampil */}
+                  <div className="flex justify-between">
+                    <span className="opacity-70 text-xs">BMI</span>
+                    <span className="font-bold text-cyan-400">{bmi}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // ✅ Ini branch kosong saat tidak ada data
+              <div className="w-full flex flex-col justify-center items-center text-center gap-2 text-gray-400">
+                <Dumbbell className="w-8 h-8 opacity-40" />
+                <p className="font-semibold text-lg">Profile tubuh belum ada</p>
+                <p className="text-sm">Silakan isi data diri dulu untuk mendapat rekomendasi</p>
+                <Link href={!session?"/login":"/FormIsiDataDiri"}>
+                <Button className={`${!session?"bg-violet-700":"bg-lime-400"}`}>{!session?"login":"Isi Data Diri"}</Button>
+                </Link>
+              </div>
+            )}
+
+            
+           {personalInfo && personalInfo.length > 0 && <div className="w-full h-15 flex justify-between items-center px-4 py-2">
               <Link href={'/FormIsiDataDiri'} className=" relative">
                 <div className="bg-cyan-500/50 px-2 py-1 h-[40px] w-[150px] text-foreground text-center absolute top-0 left-0 flex justify-center items-center transition-all 
                 hover:shadow-[0_0_15px_rgba(0,255,255,0.4)]  hover:text-cyan-100  " style={{
@@ -127,7 +119,7 @@ export default async function Home() {
                 </div>
               </Link>
               {/* <ToastButton /> */}
-            </div>
+            </div>}
           </div>
           <div className="w-full h-[30%] flex justify-between items-center pt-4 ">
             <div className="relative">
@@ -188,7 +180,14 @@ export default async function Home() {
           </div>
         </div>
       </div>
-      <CardMacro tdee={macro[0].tdee} rmr={macro[0].rmr} targetKalori={macro[0].targetKalori} protein={macro[0].protein} lemak={macro[0].lemak} karbohidrat={macro[0].karbohidrat}/>
+        <CardMacro {...(macro?.[0] ?? {
+          tdee: null,
+          rmr: null,
+          targetKalori: null,
+          protein: null,
+          lemak: null,
+          karbohidrat: null
+        })}/>
     </div>
   );
 }

@@ -1,32 +1,102 @@
-import NextAuth from "next-auth"
+import NextAuth, { DefaultSession } from "next-auth"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
-import { getPersonalData } from "./action/supabaseFunc";
-import { redirect } from "next/navigation";
- 
+
+// ✅ Minimal DB function - hanya sinkronisasi user ID
+async function syncUserToDb(userData: {
+  id: string
+  email: string
+  name: string
+  image: string
+  provider: string
+}) {
+  try {
+    // ✅ Simple upsert - hanya basic info
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users`, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        image: userData.image,
+        provider: userData.provider,
+      })
+    })
+    return response.ok
+  } catch (error) {
+    console.error('Sync error:', error)
+    return false
+  }
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string
+      username: string | null
+      location: string | null
+      provider: string
+    } & DefaultSession["user"]
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [Google,GitHub],
-  pages: {
-    signIn: '/login'
-  },
+  providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
+    GitHub({
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+    })
+  ],
+  session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, account, profile}) {
-      // Persist the OAuth access_token and or the user id to the token right after signin
-      if (account) {
-        token.id = profile?.sub || '',
-        getPersonalData(token.id) === null? null:getPersonalData(token.id);
+    async signIn({ user, account, profile }) {
+      // ✅ Sync minimal data ke DB (fire and forget)
+      if (account && profile) {
+        syncUserToDb({
+          id: user.id || profile.sub || '',
+          email: user.email || '',
+          name: user.name || '',
+          image: user.image || '',
+          provider: account.provider,
+        })
+      }
+      return true
+    },
+
+    async jwt({ token, account, profile }) {
+      if (account && profile) {
+        token.id = profile.sub || profile.id || '';
+        token.provider = account.provider;
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        if (account.provider === 'google') {
+          token.username = (profile as any).given_name || '';
+          token.location = '';
+        } else if (account.provider === 'github') {
+          token.username = (profile as any).login || '';
+          token.location = (profile as any).location || '';
+        }
+        /* eslint-enable @typescript-eslint/no-explicit-any */
       }
       return token
     },
-    async session({ session, token, user }) {
-      // Send properties to the client, like an access_token and user id from a provider.
-      session.user.id = token.id || ''
 
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.username = token.username as string | null
+        session.user.location = token.location as string | null
+        session.user.provider = token.provider as string
+      }
       return session
-    },
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth
     },
   },
 })

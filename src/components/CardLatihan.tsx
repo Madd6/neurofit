@@ -1,15 +1,15 @@
 "use client"
-import { rekomendasiOlahragaSchema } from '@/types/schemaResponseAi'
 import React, { useState } from 'react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog'
-import { Card, CardAction, CardContent, CardHeader } from './ui/card'
+import { Card, CardContent, CardHeader } from './ui/card'
 import { Button } from './ui/button'
-import { Calendar, ChevronDown, ChevronRight, ChevronUp, Clock, Dumbbell, Filter, Loader2, RefreshCcw } from 'lucide-react'
+import { Calendar, ChevronDown, ChevronUp, Clock, Dumbbell, Filter, Loader2 } from 'lucide-react'
 import { Label } from './ui/label'
 import { Checkbox } from './ui/checkbox'
 import { getRekomendasiOlahraga } from '@/action/getRekomendasiOlahraga'
 import LoadingOverlay from './loadingOverlay'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 type MenuLatihan = {
     nama: string;
@@ -17,24 +17,29 @@ type MenuLatihan = {
     repetisi: string;
 }
 
-// ✅ Ubah props untuk menerima array langsung
-const CardLatihan = (prop: { Dlatihan: any | null }) => {
+type LatihanItem = {
+    hari: string;
+    kategori: string;
+    durasi: number;
+    catatan: string;
+    detailLatihan: MenuLatihan[];
+}
+
+// ✅ Props dengan type yang lebih jelas
+interface CardLatihanProps {
+    Dlatihan: LatihanItem[] | null;
+}
+
+const CardLatihan = ({ Dlatihan }: CardLatihanProps) => {
     const [revealedLatihan, setRevealedLatihan] = useState<{[key: number]: boolean}>({})
     const [showAlert, setShowAlert] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
-    const ArrayLatihan = [
-        prop.Dlatihan[0],
-        prop.Dlatihan[1],
-        prop.Dlatihan[2],
-        prop.Dlatihan[3],
-        prop.Dlatihan[4],
-        prop.Dlatihan[5],
-        prop.Dlatihan[6],
-    ]
-    // ✅ State sudah langsung array
-    const [initialLatihan, setInitialLatihan] = useState<rekomendasiOlahragaSchema | null>(ArrayLatihan)
-    // console.log(initialLatihan)
+    // ✅ Initialize dengan data yang diterima atau array kosong
+    const [initialLatihan, setInitialLatihan] = useState<LatihanItem[]>(
+        Array.isArray(Dlatihan) ? Dlatihan : []
+    )
+    
     const [selectedKategori, setSelectedKategori] = useState<string[]>([])
     const [selectedHari, setSelectedHari] = useState<string[]>([])
 
@@ -58,7 +63,7 @@ const CardLatihan = (prop: { Dlatihan: any | null }) => {
         { value: "calisthenics", label: "Calisthenics", icon: "🤸" }
     ];
 
-     const handleKategoriChange = (kategori: string) => {
+    const handleKategoriChange = (kategori: string) => {
         setSelectedKategori(prev => 
             prev.includes(kategori) 
                 ? prev.filter(k => k !== kategori)
@@ -77,169 +82,204 @@ const CardLatihan = (prop: { Dlatihan: any | null }) => {
     const handleMintaRekomendasi = async () => {
         setShowAlert(false)
         setIsLoading(true)
-        const response = await getRekomendasiOlahraga({hariLatihanDalamSeminggu: selectedHari, kategoriLatihan: selectedKategori})
-        if(!response.success || !response.data){
-            toast(response.msg)
-            return
+        
+        try {
+            const response = await getRekomendasiOlahraga({
+                hariLatihanDalamSeminggu: selectedHari, 
+                kategoriLatihan: selectedKategori
+            })
+            
+            if (!response.success || !response.data) {
+                if(response.msg === "gagal mendapatkan personal data"){
+                    toast.error(() => (
+                        <div className="flex flex-col gap-2">
+                        <p>{response.msg}</p>
+                        <Link href={'/FormIsiDataDiri'}>
+                            <Button size={"sm"} className='bg-lime-400'>Isi Data Diri</Button>
+                        </Link>
+                        </div>
+                    ))
+                    return
+                    }
+                toast.error(response.msg || 'Gagal mendapatkan rekomendasi')
+                return
+            }
+            
+            // ✅ Update state dengan data baru
+            if (Array.isArray(response.data)) {
+                setInitialLatihan(response.data)
+                toast.success('Rekomendasi berhasil dimuat!')
+            } else {
+                toast.error('Format data tidak valid')
+            }
+        } catch (error) {
+            toast.error('Terjadi kesalahan saat memproses permintaan')
+            console.error('Error:', error)
+        } finally {
+            setIsLoading(false)
         }
-        setInitialLatihan(response.data)
-        setIsLoading(false)
     }
 
     const isFormValid = selectedKategori.length > 0 && selectedHari.length > 0;
     
-    // ✅ initialLatihan sudah array, tinggal cek aja
-    const jadwalLatihan = initialLatihan || [];
-    
     return (
         <>
             {isLoading && <LoadingOverlay />}
+            
             {/* Alert Dialog */}
             <AlertDialog open={showAlert} onOpenChange={setShowAlert}>
                 <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Minta Rekomendasi Baru?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    Rekomendasi latihan sebelumnya akan diganti dengan yang baru. 
-                    Proses ini memerlukan waktu beberapa detik. Apakah Anda yakin ingin melanjutkan?
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleMintaRekomendasi}>Continue</AlertDialogAction>
-                </AlertDialogFooter>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Minta Rekomendasi Baru?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Rekomendasi latihan sebelumnya akan diganti dengan yang baru. 
+                            Proses ini memerlukan waktu beberapa detik. Apakah Anda yakin ingin melanjutkan?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleMintaRekomendasi}>
+                            Lanjutkan
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
             {/* Main Card */}
-            <Card className="flex-1/4 max-w-screen min-h-80">
-                <>
-                    <CardHeader>
-                        <div className="flex items-center gap-2 text-2xl font-bold">
-                            <Filter className="w-6 h-6 text-cyan-400" />
-                            Pengaturan Latihan
-                        </div>
-                    </CardHeader>
+            <Card className="flex-1 w-full min-h-80">
+                <CardHeader>
+                    <div className="flex items-center gap-2 text-2xl font-bold">
+                        <Filter className="w-6 h-6 text-cyan-400" />
+                        Pengaturan Latihan
+                    </div>
+                </CardHeader>
 
-                    <CardContent className="space-y-6">
-                        {/* Kategori Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-base font-semibold flex items-center gap-2">
-                                <Dumbbell className="w-4 h-4 text-lime-400" />
-                                Pilih Kategori Latihan (bisa lebih dari 1)
-                            </Label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                {KATEGORI_OPTIONS.map(kategori => (
-                                    <div 
-                                        key={kategori.value}
-                                        className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent ${
-                                            selectedKategori.includes(kategori.value) 
-                                                ? 'border-primary bg-primary/5' 
-                                                : 'border-border'
-                                        }`}
-                                        onClick={() => handleKategoriChange(kategori.value)}
+                <CardContent className="space-y-6">
+                    {/* Kategori Selection */}
+                    <div className="space-y-3">
+                        <Label className="text-base font-semibold flex items-center gap-2">
+                            <Dumbbell className="w-4 h-4 text-lime-400" />
+                            Pilih Kategori Latihan (bisa lebih dari 1)
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            {KATEGORI_OPTIONS.map(kategori => (
+                                <div 
+                                    key={kategori.value}
+                                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent ${
+                                        selectedKategori.includes(kategori.value) 
+                                            ? 'border-primary bg-primary/5' 
+                                            : 'border-border'
+                                    }`}
+                                    onClick={() => handleKategoriChange(kategori.value)}
+                                >
+                                    <Checkbox 
+                                        id={`kategori-${kategori.value}`}
+                                        checked={selectedKategori.includes(kategori.value)}
+                                        onCheckedChange={() => handleKategoriChange(kategori.value)}
+                                    />
+                                    <Label 
+                                        htmlFor={`kategori-${kategori.value}`}
+                                        className="flex items-center gap-2 cursor-pointer flex-1"
                                     >
-                                        <Checkbox 
-                                            id={`kategori-${kategori.value}`}
-                                            checked={selectedKategori.includes(kategori.value)}
-                                            onCheckedChange={() => handleKategoriChange(kategori.value)}
-                                        />
-                                        <Label 
-                                            htmlFor={`kategori-${kategori.value}`}
-                                            className="flex items-center gap-2 cursor-pointer flex-1"
-                                        >
-                                            <span className="text-2xl">{kategori.icon}</span>
-                                            <span className="font-medium">{kategori.label}</span>
-                                        </Label>
-                                    </div>
-                                ))}
-                            </div>
+                                        <span className="text-2xl">{kategori.icon}</span>
+                                        <span className="font-medium">{kategori.label}</span>
+                                    </Label>
+                                </div>
+                            ))}
                         </div>
+                    </div>
 
-                        {/* Hari Selection */}
-                        <div className="space-y-3">
-                            <Label className="text-base font-semibold flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-violet-700" />
-                                Pilih Hari Latihan
-                            </Label>
-                            <div className="grid grid-cols-3 md:grid-cols-7 lg:grid-cols-7 gap-2">
-                                {HARI_OPTIONS.map(hari => (
-                                    <div 
-                                        key={hari.value}
-                                        className={`flex w-22 lg:w-32 md:w-24 items-center space-x-1 lg:space-x-4 md:space-x-2 p-2 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent ${
-                                            selectedHari.includes(hari.value) 
-                                                ? 'border-primary bg-primary/5' 
-                                                : 'border-border'
-                                        }`}
-                                        onClick={() => handleHariChange(hari.value)}
+                    {/* Hari Selection */}
+                    <div className="space-y-3">
+                        <Label className="text-base font-semibold flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-violet-700" />
+                            Pilih Hari Latihan
+                        </Label>
+                        <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+                            {HARI_OPTIONS.map(hari => (
+                                <div 
+                                    key={hari.value}
+                                    className={`flex items-center space-x-2 p-2 rounded-lg border-2 transition-all cursor-pointer hover:bg-accent ${
+                                        selectedHari.includes(hari.value) 
+                                            ? 'border-primary bg-primary/5' 
+                                            : 'border-border'
+                                    }`}
+                                    onClick={() => handleHariChange(hari.value)}
+                                >
+                                    <Checkbox 
+                                        id={`hari-${hari.value}`}
+                                        checked={selectedHari.includes(hari.value)}
+                                        onCheckedChange={() => handleHariChange(hari.value)}
+                                    />
+                                    <Label 
+                                        htmlFor={`hari-${hari.value}`}
+                                        className="cursor-pointer font-medium flex-1 text-sm"
                                     >
-                                        <Checkbox 
-                                            id={`hari-${hari.value}`}
-                                            checked={selectedHari.includes(hari.value)}
-                                            onCheckedChange={() => handleHariChange(hari.value)}
-                                        />
-                                        <Label 
-                                            htmlFor={`hari-${hari.value}`}
-                                            className="cursor-pointer font-medium flex-1 text-sm"
-                                        >
-                                            {hari.label}
-                                        </Label>
-                                    </div>
-                                ))}
-                            </div>
+                                        {hari.label}
+                                    </Label>
+                                </div>
+                            ))}
                         </div>
+                    </div>
 
-                        {/* Submit Button */}
-                        <div className="pt-4">
-                            <Button 
-                                onClick={() => setShowAlert(true)} 
-                                disabled={isLoading || !isFormValid}
-                                className="w-full h-12 text-base bg-cyan-400"
-                                size="lg"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="animate-spin mr-2" />
-                                        Sedang Memproses...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Dumbbell className="mr-2 " />
-                                        Minta Rekomendasi Latihan
-                                    </>
-                                )}
-                            </Button>
-                            {!isFormValid && (
-                                <p className="text-sm text-muted-foreground mt-2 text-center">
-                                    Pilih minimal 1 kategori dan 1 hari untuk melanjutkan
+                    {/* Submit Button */}
+                    <div className="pt-4">
+                        <Button 
+                            onClick={() => setShowAlert(true)} 
+                            disabled={isLoading || !isFormValid}
+                            className="w-full h-12 text-base bg-cyan-400 hover:bg-cyan-500"
+                            size="lg"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="animate-spin mr-2" />
+                                    Sedang Memproses...
+                                </>
+                            ) : (
+                                <>
+                                    <Dumbbell className="mr-2" />
+                                    Minta Rekomendasi Latihan
+                                </>
+                            )}
+                        </Button>
+                        {!isFormValid && (
+                            <p className="text-sm text-muted-foreground mt-2 text-center">
+                                Pilih minimal 1 kategori dan 1 hari untuk melanjutkan
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Summary */}
+                    {(selectedKategori.length > 0 || selectedHari.length > 0) && (
+                        <div className="p-4 bg-muted rounded-lg space-y-2">
+                            <p className="text-sm font-semibold">Ringkasan Pilihan:</p>
+                            {selectedKategori.length > 0 && (
+                                <p className="text-sm">
+                                    <span className="font-medium">Kategori:</span> {
+                                        selectedKategori.map(k => 
+                                            KATEGORI_OPTIONS.find(opt => opt.value === k)?.label
+                                        ).join(', ')
+                                    }
+                                </p>
+                            )}
+                            {selectedHari.length > 0 && (
+                                <p className="text-sm">
+                                    <span className="font-medium">Hari:</span> {selectedHari.length} hari ({
+                                        selectedHari.map(h => 
+                                            HARI_OPTIONS.find(opt => opt.value === h)?.label
+                                        ).join(', ')
+                                    })
                                 </p>
                             )}
                         </div>
-
-                        {/* Summary */}
-                        {(selectedKategori.length > 0 || selectedHari.length > 0) && (
-                            <div className="p-4 bg-muted rounded-lg space-y-2">
-                                <p className="text-sm font-semibold">Ringkasan Pilihan:</p>
-                                {selectedKategori.length > 0 && (
-                                    <p className="text-sm">
-                                        <span className="font-medium">Kategori:</span> {selectedKategori.join(', ')}
-                                    </p>
-                                )}
-                                {selectedHari.length > 0 && (
-                                    <p className="text-sm">
-                                        <span className="font-medium">Hari:</span> {selectedHari.length} hari ({selectedHari.join(', ')})
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </CardContent>
-                </>
+                    )}
+                </CardContent>
             </Card>
 
-            {/* Card Latihan - ✅ Langsung cek array */}
-            {Array.isArray(jadwalLatihan) && jadwalLatihan.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {jadwalLatihan.map((data, index) => (
+            {/* Card Latihan */}
+            {initialLatihan.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                    {initialLatihan.map((data, index) => (
                         <Card key={index} className="flex flex-col hover:shadow-lg transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-center justify-between">
@@ -252,7 +292,7 @@ const CardLatihan = (prop: { Dlatihan: any | null }) => {
                             
                             <CardContent className="flex-1 flex flex-col">
                                 <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-                                    <Clock className="w-4 h-4 " />
+                                    <Clock className="w-4 h-4" />
                                     <span className="font-semibold text-violet-700">{data.durasi}</span>
                                     <span>menit</span>
                                 </div>
@@ -264,7 +304,7 @@ const CardLatihan = (prop: { Dlatihan: any | null }) => {
                                 <Button 
                                     onClick={() => toggleMenu(index)} 
                                     variant="outline"
-                                    className="w-full text-cyan-400"
+                                    className="w-full text-cyan-400 hover:text-cyan-500"
                                 >
                                     {revealedLatihan[index] ? (
                                         <>
@@ -286,14 +326,14 @@ const CardLatihan = (prop: { Dlatihan: any | null }) => {
                                             <span>Detail Latihan</span>
                                         </div>
                                         
-                                        {data.detailLatihan && Array.isArray(data.detailLatihan) && data.detailLatihan.length > 0 ? (
-                                            data.detailLatihan.map((detail: MenuLatihan, idx: number) => (
+                                        {data.detailLatihan && data.detailLatihan.length > 0 ? (
+                                            data.detailLatihan.map((detail, idx) => (
                                                 <div 
                                                     key={idx} 
                                                     className="p-3 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
                                                 >
                                                     <div className="font-medium mb-2">{detail.nama}</div>
-                                                    <div className="flex gap-2 ">
+                                                    <div className="flex gap-2">
                                                         <span className="text-sm px-3 py-2 bg-background/50 rounded-md font-medium text-lime-400">
                                                             {detail.set} set
                                                         </span>

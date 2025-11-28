@@ -3,16 +3,22 @@ import { auth } from "@/auth";
 import { GoogleGenAI } from "@google/genai";
 import {  getPersonalData, insertRekomendasiOlahraga } from "./supabaseFunc";
 import { SchemaRekomendasiOlahraga } from "@/types/schemaResponseAi";
-import { success, z } from "zod";
+import { z } from "zod";
 const ai = new GoogleGenAI({apiKey: process.env.NEXT_API_OPENAI_KEY!});
 export async function getRekomendasiOlahraga({hariLatihanDalamSeminggu,kategoriLatihan}: {hariLatihanDalamSeminggu: string[], kategoriLatihan: string[]}) {
     const session = await auth()
-    if (!session?.user) throw new Error('User not authenticated');
+    if (!session?.user) {
+      return ({
+          success: false,
+          msg:"login terlebih dahulu"
+        })
+    };
     const userId = session.user.id;
     const res = await getPersonalData(userId);
     if (!res.success || !res.data) {
         return ({
-          success: false
+          success: false,
+          msg:"gagal mendapatkan personal data"
         })
       }
     const personalData = res.data
@@ -92,9 +98,9 @@ export async function getRekomendasiOlahraga({hariLatihanDalamSeminggu,kategoriL
         ====================
         **ATURAN WAJIB:**
         1. Buat program TEPAT 7 hari (Senin–Minggu) dalam array JSON
-        2. Sesuaikan jumlah hari latihan aktif dengan ${p.hariLatihanDalamSeminggu} hari
+        2. Sesuaikan jumlah hari latihan aktif dengan ${hariLatihanDalamSeminggu} hari
         3. Sisa hari = REST DAY atau Active Recovery (jalan santai 15-20 menit)
-        4. Distribusi kategori sesuai preferensi user: ${p.kategoriLatihan}
+        4. Distribusi kategori sesuai preferensi user: ${kategoriLatihan}
         5. jangan masukkan kategori diluar preferensi user
 
         **Format JSON untuk SETIAP HARI:**
@@ -139,35 +145,50 @@ export async function getRekomendasiOlahraga({hariLatihanDalamSeminggu,kategoriL
         Sebelum memberikan jawaban, pastikan:
         ✓ Program sesuai dengan riwayat penyakit pengguna
         ✓ Hanya menggunakan latihan dari daftar yang diizinkan
-        ✓ Jumlah hari latihan aktif = ${p.hariLatihanDalamSeminggu}
+        ✓ Jumlah hari latihan aktif = ${hariLatihanDalamSeminggu}
         ✓ JSON valid tanpa syntax error
         ✓ Setiap latihan memiliki instruksi yang jelas
         ✓ Ada variasi yang cukup (tidak monoton)
         ✓ Ada rest day yang cukup untuk recovery
 
         **MULAI BUAT PROGRAM SEKARANG - OUTPUT HANYA JSON ARRAY**`;
-        const response = await ai.models.generateContent({
+        try {
+          const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: [
               {
                 role: "user",
-                parts: [
-                  {
-                    text: prompt
-                  }
-                ]
+                parts: [{ text: prompt }]
               }
-            ],config: {
+            ],
+            config: {
               responseMimeType: "application/json",
               responseJsonSchema: z.toJSONSchema(SchemaRekomendasiOlahraga),
-              // temperature: 0.2,
             }
           });
-          if(!response.text) return { success: false, data: null,msg: "Gagal Mendapat response" };
+
+          if (!response.text) {
+            return { success: false, data: null, msg: "Gagal mendapat response text dari AI" };
+          }
+
           const parseResult = SchemaRekomendasiOlahraga.safeParse(JSON.parse(response.text));
-          if (!parseResult.success) return { success: false, data:null, msg:"gagal parse" };
+          if (!parseResult.success) {
+            return { success: false, data: null, msg: "Gagal parsing JSON response schema AI." };
+          }
+
+          // Simpan ke DB via sistem website
           await insertRekomendasiOlahraga(parseResult.data);
-          console.log("Rekomendasi olahraga berhasil disimpan ke database.");
-          console.log("Rekomendasi olahraga:", parseResult.data);
-          return { success: true, data: parseResult.data, msg:"success" }
+
+          return { success: true, data: parseResult.data, msg: "success mendapatkan rekomendasi" };
+          
+        } catch (err) {
+          // ❗Ini bagian penting → jangan throw, tapi return ke UI
+          const error = err as { message?: string };
+
+          return {
+            success: false,
+            data: null,
+            msg: `Error API Gemini: ${error.message || "Terjadi kegagalan saat memanggil layanan AI."}`
+          };
+        }
     }

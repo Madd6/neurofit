@@ -74,7 +74,7 @@ const FormUiReusable = ({step}: FormUiReusableProps) => {
     
     return (
         <>
-            {uiToRender.map((item, index) => (
+            {uiToRender.map((item) => (
                 item.model === "option" ? (
                     <div className='w-full display flex flex-col justify-between' key={item.value}>
                         <FormField

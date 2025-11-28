@@ -18,6 +18,7 @@ import {
 import { insertRekomendasiMakanan } from '@/action/supabaseFunc'
 import LoadingOverlay from './loadingOverlay'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 
 type Bahan = {
@@ -29,8 +30,9 @@ type CaraMemasak = {
   langkah: string,
   urutanLangkah: number
 }
-
-// Komponen Loading Overlay
+interface CardMenuMakananProps {
+  menu?: SchemaMenuMakanan | null;
+}
 
 
 // Komponen Nutrisi Card
@@ -132,7 +134,7 @@ const ComparisonModal = ({
 )
 
 // Main Component
-const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
+const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
   const [revealedMenus, setRevealedMenus] = useState<{[key: number]: boolean}>({})
   const [revealedCatatan, setRevealedCatatan] = useState(false)
   const [revealedTotalNutrisi, setRevealedTotalNutrisi] = useState(false)
@@ -140,7 +142,7 @@ const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
   const [showComparison, setShowComparison] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [menuBaru, setMenuBaru] = useState<SchemaMenuMakanan | null>(null)
-  const [initialMenu, setInitialMenu] = useState<SchemaMenuMakanan | null>(menu)
+  const [initialMenu, setInitialMenu] = useState<SchemaMenuMakanan | null>(menu?menu:null)
   
   const toggleMenu = (index: number) => {
     setRevealedMenus(prev => ({ ...prev, [index]: !prev[index] }))
@@ -152,16 +154,28 @@ const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
 
   try {
     const res = await getRekomendasiMakanan()
-    if(!res){
-      toast("terjadi kesalahan fatal")
-      return
-    }
     if(!res.success || !res.data){
-        toast(res.msg)
+        if(res.msg === "gagal mendapatkan personal data"){
+          toast.error(() => (
+            <div className="flex flex-col gap-2">
+              <p>{res.msg}</p>
+              <Link href={'/FormIsiDataDiri'}>
+                <Button size={"sm"} className='bg-lime-400'>Isi Data Diri</Button>
+              </Link>
+            </div>
+          ))
+          return
+        }
+        toast.error(res.msg)
         return
     }
+    if(res.msg === "success insert ke database"){
+      setMenuBaru(res.data)
+      return
+    }
+    toast.success(res.msg)
 
-    setMenuBaru(res.data)       // sekarang pasti sesuai tipe
+    setMenuBaru(res.data)
     setShowComparison(true)
   } catch (error) {
     console.error("Error fetching new menu:", error)
@@ -175,9 +189,10 @@ const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
     setShowComparison(false)
     const response = await insertRekomendasiMakanan(menuBaru!)
     if(!response.success || !response.data){
-        toast(response.msg)
+        toast.error(response.msg)
         return
     }
+    toast.success(response.msg)
     setInitialMenu(response.data)
     // window.location.reload() // atau update state menu
   }
@@ -205,7 +220,7 @@ const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
       <Card className="flex-1/4 max-w-screen min-h-80">
         {menu === null ? (
           <div className="w-full h-full flex justify-center items-center p-6">
-            <Button onClick={() => setShowAlert(true)} disabled={isLoading}>
+            <Button onClick={() => setShowAlert(true)} disabled={isLoading} className='bg-lime-400'>
               {isLoading ? <Loader2 className="animate-spin" /> : <Salad />}
               {isLoading ? "Loading..." : "Minta Rekomendasi"}
             </Button>
@@ -256,7 +271,10 @@ const CardMenuMakanan = (menu: SchemaMenuMakanan | null) => {
       </Card>
 
       {/* Meal Cards */}
-      {initialMenu !== null && initialMenu.meals.map((meal: any, index: number) => (
+      {initialMenu !== null && initialMenu.meals.map((
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        meal: any, index: number
+      ) => (
         <Card key={index} className="flex-1/4 max-w-screen min-h-80">
           <CardHeader>
             <div className='text-2xl font-bold'>{meal.nama}</div>
