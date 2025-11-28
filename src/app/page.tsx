@@ -180,14 +180,14 @@ export default async function Home() {
           </div>
         </div>
       </div>
-        <CardMacro {...(macro?.[0] ?? {
-          tdee: null,
-          rmr: null,
-          targetKalori: null,
-          protein: null,
-          lemak: null,
-          karbohidrat: null
-        })}/>
+        <CardMacro
+          tdee={macro?.[0]?.tdee ?? null}
+          rmr={macro?.[0]?.rmr ?? null}
+          targetKalori={macro?.[0]?.targetKalori ?? null}
+          protein={macro?.[0]?.protein ?? null}
+          lemak={macro?.[0]?.lemak ?? null}
+          karbohidrat={macro?.[0]?.karbohidrat ?? null}
+        />
     </div>
   );
 }
