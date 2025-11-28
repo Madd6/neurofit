@@ -2,7 +2,7 @@ import NextAuth, { DefaultSession } from "next-auth"
 import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import { createClient } from "./utils/supabase/server"
-import { redirect } from "next/navigation"
+// import { redirect } from "next/navigation"
 
 // ✅ Minimal DB function - hanya sinkronisasi user ID
 async function syncUserToDb(userData: {
