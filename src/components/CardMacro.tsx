@@ -5,9 +5,11 @@ import { ChartRadarDefault } from "@/components/ChartsMakro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "./ui/button";
 // import Link from "next/link";
-import { Calculator } from "lucide-react";
+import { Calculator, Loader2 } from "lucide-react";
 import tdeeCalculator from "@/action/tdeeCalculator";
 import { toast } from "sonner";
+import { useState } from "react";
+import LoadingOverlay from "./loadingOverlay";
 
 interface CardMacroProps {
   tdee: number | null;
@@ -19,13 +21,18 @@ interface CardMacroProps {
 }
 
 const CardMacro = (props: CardMacroProps) => {
+  const [isLoading,setIsLoading] = useState(false)
   const handleTdeeCalculator = async () => {
+    setIsLoading(true)
     const res = await tdeeCalculator();
     if (!res.success || !res.data) {
+      setIsLoading(false)
       toast.error(res.msg || "Gagal menghitung TDEE");
       return;
     }
+    setIsLoading(false)
     toast.success(res.msg || "Berhasil menghitung TDEE");
+
   };
 
   const isEmpty =
@@ -37,6 +44,8 @@ const CardMacro = (props: CardMacroProps) => {
   // ✅ Kalau belum ada data makro → tampilkan tombol hitung TDEE
   if (isEmpty) {
     return (
+      <>
+      {isLoading && <LoadingOverlay />}
       <div className="px-4 py-8 w-full md:min-h-screen flex justify-center items-center ">
         <Card className="w-70 md:h-[570px] h-[300px] overflow-hidden border-0 
           [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_260,35_A_20,20_0,0,1_280,55_L_280,280_A_20,20_0,0,1_260,300_L_20,300_A_20,20_0,0,1_0,280_L_0,0_Z')]
@@ -60,12 +69,14 @@ const CardMacro = (props: CardMacroProps) => {
                 className="w-full bg-cyan-400 hover:bg-cyan-500 text-black hover:opacity-90"
                 size="lg"
               >
-                Calculate TDEE
+                {isLoading ? <Loader2 className="animate-spin" /> : <Calculator />}
+              {isLoading ? "Loading..." : "Minta Rekomendasi"}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+    </>
     );
   }
 
