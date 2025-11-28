@@ -9,7 +9,9 @@ const CardMacroWrapper = async() => {
     const userId = session?.user.id;
     const resMacro = await getMakronutrisi(userId!);
     if(!resMacro.success || !resMacro.data){
-    <OneShotToast message={resMacro.msg || "Gagal mengambil data Makronutrisi"} />
+        return <div className='flex justify-center items-center w-screen h-screen'>
+            <p className='text-red-400'>Gagal mendapatkan makronutrisi.Coba lagi nanti</p>
+        </div>
     }
     const macro = resMacro.data
   return (
