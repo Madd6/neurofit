@@ -133,7 +133,7 @@ export async function getMakronutrisi(
     .eq("userId", userId)
 
   if (error) {
-    return { success: false, msg: error.message }
+    return { success: false, msg: "gagal mendapatkan makronutrisi" }
   }
 
   const typedData = (data ?? []) as MakronutrisiRow[]
