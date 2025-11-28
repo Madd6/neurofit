@@ -1,6 +1,5 @@
 import { getMakronutrisi, getPersonalData } from "@/action/supabaseFunc";
 import { auth } from "@/auth";
-import CardMacro from "@/components/CardMacro";
 import Image from "next/image";
 import illustrationFitness from '../assets/freepik__background__65885.png';
 import INI from '../assets/INI.png';
@@ -10,8 +9,8 @@ import futuristicIcon from '../assets/futuristicIcon.svg';
 import { orbitron, sterion } from "./layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { OneShotToast } from "@/components/OneShootToast";
 import { Dumbbell } from "lucide-react";
+import CardMacroWrapper from "@/components/cardMacroWrapper";
 
 const hitungBMI = async({tinggiBadan,beratBadan}:{tinggiBadan:number,beratBadan:number} ) =>{
   const tinggiDalamMeter = tinggiBadan / 100;
@@ -37,15 +36,10 @@ function getAge(birthDate: string | Date): number {
 
 export default async function Home() {
   const session = await auth()
-  console.log("session home", session);
+  // console.log("session home", session);
   const userId = session?.user.id;
   const res = await getPersonalData(userId!);
   const personalInfo = res.data
-  const resMacro = await getMakronutrisi(userId!);
-  if(!resMacro.success || !resMacro.data){
-    <OneShotToast message={resMacro.msg || "Gagal mengambil data Makronutrisi"} />
-  }
-  const macro = resMacro.data
   const age = getAge(personalInfo?.[0]?.tanggalLahir ?? "2025-01-01");
   const bmi = personalInfo && personalInfo.length > 0
   ? await hitungBMI({
@@ -180,14 +174,7 @@ export default async function Home() {
           </div>
         </div>
       </div>
-        <CardMacro
-          tdee={macro?.[0]?.tdee ?? null}
-          rmr={macro?.[0]?.rmr ?? null}
-          targetKalori={macro?.[0]?.targetKalori ?? null}
-          protein={macro?.[0]?.protein ?? null}
-          lemak={macro?.[0]?.lemak ?? null}
-          karbohidrat={macro?.[0]?.karbohidrat ?? null}
-        />
+        <CardMacroWrapper />
     </div>
   );
 }
