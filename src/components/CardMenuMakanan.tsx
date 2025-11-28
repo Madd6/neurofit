@@ -217,7 +217,7 @@ const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
       </AlertDialog>
 
       {/* Main Card */}
-      <Card className="md:flex-1/4 max-w-screen min-h-80">
+      <Card className="w-screen min-h-80">
         {menu === null ? (
           <div className="w-full h-full flex justify-center items-center p-6">
             <Button onClick={() => setShowAlert(true)} disabled={isLoading} className='bg-lime-400'>
