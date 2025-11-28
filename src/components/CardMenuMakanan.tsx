@@ -275,7 +275,7 @@ const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         meal: any, index: number
       ) => (
-        <Card key={index} className="flex-1/4 max-w-screen min-h-80">
+        <Card key={index} className="md:flex-1/4 flex-1 max-w-screen min-h-80">
           <CardHeader>
             <div className='text-2xl font-bold'>{meal.nama}</div>
           </CardHeader>
