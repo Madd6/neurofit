@@ -1,7 +1,7 @@
 import React from 'react'
 import CardMacro from './CardMacro'
 import { auth } from '@/auth';
-import { getMakronutrisi, getPersonalData } from '@/action/supabaseFunc';
+import { getMakronutrisi } from '@/action/supabaseFunc';
 import { OneShotToast } from './OneShootToast';
 
 const CardMacroWrapper = async() => {
