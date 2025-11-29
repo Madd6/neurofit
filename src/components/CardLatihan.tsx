@@ -34,12 +34,20 @@ const CardLatihan = ({ Dlatihan }: CardLatihanProps) => {
     const [revealedLatihan, setRevealedLatihan] = useState<{[key: number]: boolean}>({})
     const [showAlert, setShowAlert] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const ArrayLatihan = Dlatihan?[
+        Dlatihan[0],
+        Dlatihan[1],
+        Dlatihan[2],
+        Dlatihan[3],
+        Dlatihan[4],
+        Dlatihan[5],
+        Dlatihan[6],
+    ]:[]
 
     // ✅ Initialize dengan data yang diterima atau array kosong
     const [initialLatihan, setInitialLatihan] = useState<LatihanItem[]>(
-        Array.isArray(Dlatihan) ? Dlatihan : []
+        Array.isArray(ArrayLatihan) ? ArrayLatihan : []
     )
-    
     const [selectedKategori, setSelectedKategori] = useState<string[]>([])
     const [selectedHari, setSelectedHari] = useState<string[]>([])
 

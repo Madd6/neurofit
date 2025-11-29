@@ -170,7 +170,7 @@ const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
         return
     }
     if(res.msg === "success insert ke database"){
-      setMenuBaru(res.data)
+      setInitialMenu(res.data)
       return
     }
     toast.success(res.msg)
@@ -192,8 +192,8 @@ const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
         toast.error(response.msg)
         return
     }
-    toast.success(response.msg)
     setInitialMenu(response.data)
+    toast.success(response.msg)
     // window.location.reload() // atau update state menu
   }
 
@@ -218,7 +218,7 @@ const CardMenuMakanan = ({menu}:CardMenuMakananProps) => {
 
       {/* Main Card */}
       <Card className="w-screen min-h-80">
-        {menu === null ? (
+        {initialMenu === null ? (
           <div className="w-full h-full flex justify-center items-center p-6">
             <Button onClick={() => setShowAlert(true)} disabled={isLoading} className='bg-lime-400'>
               {isLoading ? <Loader2 className="animate-spin" /> : <Salad />}

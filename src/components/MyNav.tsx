@@ -20,7 +20,7 @@ const MyNav = async () => {
       console.log("session home", session);
       const userImage = session?.user.image ?? "";
   return (
-    <div className="absolute top-0 left-0 -translate-y-0.5 flex items-center gap-4 justify-between w-full z-[9999]">
+    <nav className="absolute top-0 left-0 -translate-y-0.5 flex items-center gap-4 justify-between w-full z-[9999]">
         <Link href={'/'} className="bg-gradient-to-br from-cyan-400 to-violet-700 p-2 h-[45px] w-[150px] text-foreground" style={{
             clipPath:'path("M 0,0 L 130,0 L 110,40 L 105,43 L 100,45  L 0,45 L 0,0 Z")'
         }}>
@@ -52,7 +52,7 @@ const MyNav = async () => {
             </Link>
             }
         </div>
-    </div>
+    </nav>
   )
 }
 

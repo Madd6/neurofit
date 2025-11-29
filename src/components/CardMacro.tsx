@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import LoadingOverlay from "./loadingOverlay";
 
+
 interface CardMacroProps {
   tdee: number | null;
   rmr: number | null;
@@ -85,8 +86,8 @@ const CardMacro = (props: CardMacroProps) => {
   // ✅ Data makro tersedia → tampilkan chart + detail
   return (
     <div className="px-4 py-8 w-full md:min-h-screen flex justify-center items-center ">
-      <Card className="w-70 md:h-[570px] h-[300px] overflow-hidden border-0
-        [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_260,35_A_20,20_0,0,1_280,55_L_280,280_A_20,20,0,0,1_260,300_L_20,300_A_20,20,0,0,1_0,280_L_0,0_Z')]
+      <Card className="md:w-70 w-[360px] md:h-[570px] h-[300px] overflow-hidden border-0
+        [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_340,35_A_20,20_0,0,1_360,55_L_360,280_A_20,20,0,0,1_340,300_L_20,300_A_20,20,0,0,1_0,280_L_0,0_Z')]
         md:[clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_260,35_A_20,20,0,0,1_280,55_L_280,550_A_20,20,0,0,1_260,570_L_20,570_A_20,20,0,0,1_0,550_L_0,0_Z')]
       ">
         <CardHeader>
