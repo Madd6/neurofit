@@ -6,30 +6,30 @@ import { GoArrowRight } from "react-icons/go";
 import Spline from '@splinetool/react-spline';
 import { useRef, useState } from 'react';
 
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Masuk ke Neurofit — Asisten Diet & Fitness AI",
-  description:
-    "Masuk ke Neurofit menggunakan OAuth Google atau GitHub untuk memulai perjalanan diet dan fitness Anda, termasuk perhitungan BMI, TDEE, dan rekomendasi nutrisi berbasis AI.",
-  keywords: [
-    "login neurofit",
-    "oauth google github",
-    "asisten diet AI",
-    "fitness AI rekomendasi",
-    "tracking kalori",
-    "hitung BMI TDEE",
-    "pola hidup sehat",
-  ],
-  robots: {
-    index: false, // karena ini halaman login → mencegah di-index Google
-    follow: false,
-  },
-  icons: {
-    icon: "/favicon.ico",              // fisiknya ada di public/
-    apple: "/apple-touch-icon.png",    // fisiknya ada di public/
-  },
-};
+// export const metadata: Metadata = {
+//   title: "Masuk ke Neurofit — Asisten Diet & Fitness AI",
+//   description:
+//     "Masuk ke Neurofit menggunakan OAuth Google atau GitHub untuk memulai perjalanan diet dan fitness Anda, termasuk perhitungan BMI, TDEE, dan rekomendasi nutrisi berbasis AI.",
+//   keywords: [
+//     "login neurofit",
+//     "oauth google github",
+//     "asisten diet AI",
+//     "fitness AI rekomendasi",
+//     "tracking kalori",
+//     "hitung BMI TDEE",
+//     "pola hidup sehat",
+//   ],
+//   robots: {
+//     index: false, // karena ini halaman login → mencegah di-index Google
+//     follow: false,
+//   },
+//   icons: {
+//     icon: "/favicon.ico",              // fisiknya ada di public/
+//     apple: "/apple-touch-icon.png",    // fisiknya ada di public/
+//   },
+// };
 
 function Page() {
     const { isDesktop } = useWindowSize();
