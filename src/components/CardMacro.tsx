@@ -57,8 +57,8 @@ const CardMacro = (props: CardMacroProps) => {
           <CardHeader>
             <CardTitle>Kalori & Nutrisi</CardTitle>
             <CardDescription>
-              Kebutuhan <span className="text-cyan-400 font-bold">Kalori</span> Dan{" "}
-              <span className="text-cyan-400 font-bold">Makronutrisi</span> Harian
+              Kebutuhan <span className="text-cyan-600 dark:text-cyan-400 font-bold">Kalori</span> Dan{" "}
+              <span className="text-cyan-600 dark:text-cyan-400 font-bold">Makronutrisi</span> Harian
             </CardDescription>
           </CardHeader>
 
@@ -93,8 +93,8 @@ const CardMacro = (props: CardMacroProps) => {
         <CardHeader>
           <CardTitle>Kalori & Nutrisi</CardTitle>
           <CardDescription>
-            Kebutuhan <span className="text-cyan-400 font-bold">Kalori</span> Dan{" "}
-            <span className="text-cyan-400 font-bold">Makronutrisi</span> Harian
+            Kebutuhan <span className="text-cyan-600 dark:text-cyan-400 font-bold">Kalori</span> Dan{" "}
+            <span className="text-cyan-600 dark:text-cyan-400 font-bold">Makronutrisi</span> Harian
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -104,20 +104,20 @@ const CardMacro = (props: CardMacroProps) => {
             karbohidrat={initialData.karbohidrat!}
           />
           <div className="bg-background/60 p-4 rounded-xl my-4">
-            <p className="text-cyan-400 text-lg font-bold">{initialData.targetKalori} kcal</p>
+            <p className="text-cyan-600 dark:text-cyan-400 text-lg font-bold">{initialData.targetKalori} kcal</p>
             <p className="text-gray-400 text-sm">Target Kalori</p>
 
             <div className="flex gap-6 mt-4">
               <div className="text-center">
-                <p className="text-cyan-300 text-sm font-bold">{initialData.protein} gr</p>
+                <p className="text-cyan-500 dark:text-cyan-300 text-sm font-bold">{initialData.protein} gr</p>
                 <p className="text-gray-400 text-xs">Protein</p>
               </div>
               <div className="text-center">
-                <p className="text-purple-400 text-sm font-bold">{initialData.lemak} gr</p>
+                <p className="text-purple-600 dark:text-purple-400 text-sm font-bold">{initialData.lemak} gr</p>
                 <p className="text-gray-400 text-xs">Fat</p>
               </div>
               <div className="text-center">
-                <p className="text-lime-400 text-sm font-bold">{initialData.karbohidrat} gr</p>
+                <p className="text-lime-500 dark:text-lime-400 text-sm font-bold">{initialData.karbohidrat} gr</p>
                 <p className="text-gray-400 text-xs">Carbs</p>
               </div>
             </div>

@@ -21,8 +21,8 @@ const CardMacroWrapper = async () => {
           <CardHeader>
             <CardTitle>Kalori & Nutrisi</CardTitle>
             <CardDescription>
-              Kebutuhan <span className="text-cyan-400 font-bold">Kalori</span> dan{" "}
-              <span className="text-cyan-400 font-bold">Makronutrisi</span> Harian
+              Kebutuhan <span className="text-cyan-600 dark:text-cyan-400 font-bold">Kalori</span> dan{" "}
+              <span className="text-cyan-600 dark:text-cyan-400 font-bold">Makronutrisi</span> Harian
             </CardDescription>
           </CardHeader>
           <CardContent className="md:h-[570px] h-[300px]">
