@@ -59,7 +59,6 @@ export async function insertPersonalData(
     return { success: false, msg: error.message }
   }
 
-  console.log("Personal data inserted successfully")
   return {
     success: true,
     data: formData,
@@ -84,7 +83,6 @@ export async function getPersonalData(
   // cast terkontrol → tidak pakai any
   const typedData = (data ?? []) as PersonalInfoRow[]
 
-  console.log("Personal data selected successfully")
   return {
     success: true,
     data: typedData.map((row) => {
@@ -118,7 +116,6 @@ export async function insertMakronutrisi(
     return { success: false, msg: error.message }
   }
 
-  console.log("makronutrisi inserted successfully")
   return { success: true, data: macros }
 }
 
@@ -174,7 +171,6 @@ export async function insertRekomendasiMakanan(
     return { success: false, msg: error.message }
   }
 
-  console.log("rekomendasiMakanan inserted successfully")
   return { success: true, data: menu, msg: "success" }
 }
 
@@ -194,7 +190,6 @@ export async function getMenuMakanan(
 
   const rows = (data ?? []) as { menuMakanan: SchemaMenuMakanan }[]
 
-  console.log("rekomendasiMakanan selected successfully")
   return {
     success: true,
     data: rows.map((row) => row.menuMakanan),
@@ -228,7 +223,6 @@ export async function insertRekomendasiOlahraga(
     return { success: false, msg: error.message }
   }
 
-  console.log("rekomendasiOlahraga inserted successfully")
   return { success: true, data: latihan }
 }
 
@@ -250,7 +244,6 @@ export async function getDetailLatihan(
   const detailLatihan = (data?.detailLatihan ??
     null) as rekomendasiOlahragaSchema | null
 
-  console.log(detailLatihan)
 
   return { success: true, data: detailLatihan }
 }

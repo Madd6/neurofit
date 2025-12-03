@@ -17,7 +17,6 @@ import {  User } from 'lucide-react';
 
 const MyNav = async () => {
     const session = await auth()
-      console.log("session home", session);
       const userImage = session?.user.image ?? "";
   return (
     <nav className="absolute top-0 left-0 -translate-y-0.5 flex items-center gap-4 justify-between w-full z-[9999]">

@@ -1,7 +1,7 @@
 // CardMacro.tsx (CLIENT COMPONENT)
 "use client";
 
-import { ChartRadarDefault } from "@/components/ChartsMakro";
+// import { ChartRadarDefault } from "@/components/ChartsMakro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "./ui/button";
 // import Link from "next/link";
@@ -10,7 +10,14 @@ import tdeeCalculator from "@/action/tdeeCalculator";
 import { toast } from "sonner";
 import { useState } from "react";
 import LoadingOverlay from "./loadingOverlay";
-
+import dynamic from "next/dynamic";
+const ChartRadarDefault = dynamic(
+  () => import("@/components/ChartsMakro").then(mod => mod.ChartRadarDefault),
+  {
+    ssr: false,
+    loading: () => <div style={{ minHeight: 230 }} className="w-full" />,
+  }
+);
 
 interface CardMacroProps {
   tdee: number | null;
@@ -49,7 +56,22 @@ const CardMacro = (props: CardMacroProps) => {
     return (
       <>
       {isLoading && <LoadingOverlay />}
-      <div className="px-4 py-8 w-full md:min-h-screen flex justify-center items-center ">
+      <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+        <div className='w-80 h-80 bg-background rounded-xl flex flex-col gap-8 justify-center items-center shadow-2xl p-8'> 
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-2">
+              <Calculator className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <Button
+              onClick={handleTdeeCalculator}
+              className="w-full bg-cyan-400 hover:bg-cyan-500 text-black hover:opacity-90"
+              size="lg"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : <Calculator />}
+            {isLoading ? "Loading..." : "Hitung Tdee"}
+            </Button>
+        </div>
+      </div>
+      {/* <div className="px-4 py-8 w-full md:min-h-screen flex justify-center items-center ">
         <Card className="w-70 md:h-[570px] h-[300px] overflow-hidden border-0 
           [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_260,35_A_20,20_0,0,1_280,55_L_280,280_A_20,20_0,0,1_260,300_L_20,300_A_20,20_0,0,1_0,280_L_0,0_Z')]
           md:[clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_165,0_L_175,5_L_190,30_L_200,35_L_260,35_A_20,20,0,0,1_280,55_L_280,550_A_20,20_0,0,1_260,570_L_20,570_A_20,20_0,0,1_0,550_L_0,0_Z')]
@@ -78,7 +100,7 @@ const CardMacro = (props: CardMacroProps) => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </>
     );
   }
@@ -98,11 +120,13 @@ const CardMacro = (props: CardMacroProps) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartRadarDefault
-            protein={initialData.protein!}
-            lemak={initialData.lemak!}
-            karbohidrat={initialData.karbohidrat!}
-          />
+          <div className="w-full min-h-[230px] md:visible hidden">
+            <ChartRadarDefault
+              protein={initialData.protein!}
+              lemak={initialData.lemak!}
+              karbohidrat={initialData.karbohidrat!}
+            />
+          </div>
           <div className="bg-background/60 p-4 rounded-xl my-4">
             <p className="text-cyan-600 dark:text-cyan-400 text-lg font-bold">{initialData.targetKalori} kcal</p>
             <p className="text-gray-400 text-sm">Target Kalori</p>

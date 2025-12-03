@@ -42,7 +42,6 @@ const FormPersonalizeData = ({personaldata}:CardMenuMakananProps) => {
         3:["RiwayatPenyakit","Alergi"],
     }
     const onSubmit: SubmitHandler<FormData> = async(data) => {
-        // console.log(data);
         const res = await insertPersonalData(data);
         if(!res.success || !res.data){
             toast(res.msg)
@@ -59,7 +58,6 @@ const FormPersonalizeData = ({personaldata}:CardMenuMakananProps) => {
         const isValid = await trigger(fieldsToValidate as any);
 
         if (!isValid) {
-            console.log('Validasi gagal, silakan lengkapi form dengan benar');
             return;
         }
         if(step <3){

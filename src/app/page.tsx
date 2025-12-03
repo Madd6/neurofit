@@ -1,11 +1,10 @@
 import {  getPersonalData } from "@/action/supabaseFunc";
 import { auth } from "@/auth";
 import Image from "next/image";
-import illustrationFitness from '../assets/freepik__background__21679.png';
-// import illustrationFitness from '../assets/freepik__background__65885.png';
-import japaneseText from '../assets/freepik__background__7492.png';
+import illustrationFitness from '../assets/freepik__background__21679.webp';
+import japaneseText from '../assets/freepik__background__7492.webp';
 import futuristicIcon from '../assets/futuristicIcon.svg';
-import { orbitron, sterion } from "./layout";
+import { orbitron } from "./layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { 
@@ -15,6 +14,7 @@ import {
   Scale,
   Activity,
   VenusAndMars,
+  Salad,
 } from "lucide-react";
 import CardMacroWrapper from "@/components/cardMacroWrapper";
 
@@ -104,7 +104,6 @@ function getAge(birthDate: string | Date): number {
 
 export default async function Home() {
   const session = await auth()
-  // console.log("session home", session);
   const userId = session?.user.id;
   const res = await getPersonalData(userId!);
   const personalInfo = res.data
@@ -171,40 +170,33 @@ export default async function Home() {
             
            {personalInfo && personalInfo.length > 0 && <div className="w-full h-15 flex justify-between items-center px-4 py-2 -translate-y-2 md:-translate-y-0">
               <Link href={'/FormIsiDataDiri'} className=" relative">
-                {/* <div className="bg-cyan-500/40 px-2 py-1 h-[40px] w-[150px] text-foreground text-center absolute top-0 left-0 flex justify-center items-center transition-all 
-                hover:shadow-[0_0_15px_rgba(0,255,255,0.4)]  hover:text-cyan-100  " style={{
-                  clipPath:'path("M 0,20 L 20,0 L 150,0 L 150,20 L 130,40 L 0,40 L 0,0 Z")'
-                }}>
-                  <div className="w-full h-full border-2 border-l-[3px] border-cyan-400/50 absolute"></div>
-                  <div className="w-full h-27 border-4 border-cyan-400/50 absolute -rotate-[44deg]"></div>
-                  Edit Profile
-                </div> */}
                 <Button className="text-foreground border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground  dark:border-cyan-400 dark:hover:bg-cyan-400/50">Edit Profile</Button>
               </Link>
-              {/* <ToastButton /> */}
             </div>}
           </div>
           <div className="w-full md:h-[30%] h-[190px] flex justify-between items-center pt-4 ">
             <div className="relative">
-              <div className=" md:w-[130px] w-[170px] bg-card md:h-[150px] h-[170px] rounded-xl flex justify-end items-end overflow-hidden text-sm font-bold px-4 py-2 relative text-foreground
+              <div className=" md:w-[130px] w-[170px] bg-card md:h-[150px] h-[170px] rounded-xl flex flex-col justify-end items-end overflow-hidden text-sm font-bold px-4 py-2 relative text-foreground
               [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_90,0_A_10,10_0,0,1_100,10_L_100,30_A_10,10_0,0,0_110,40_L_160,40_A_10,10_0,0,1_170,50_L_170,150_A_20,20_0,0,1_150,170_L_20,170_A_20,20_0,0,1_0,150_Z')]
               md:[clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_50,0_A_10,10_0,0,1_60,10_L_60,30_A_10,10_0,0,0_70,40_L_120,40_A_10,10_0,0,1_130,50_L_130,130_A_20,20_0,0,1_110,150_L_20,150_A_20,20_0,0,1_0,130_L_0,20_Z')]
               ">
+                <span className="font-extralight w-full text-center flex justify-center items-center"><Salad className="w-15 h-15"/></span><br />
                 食 AI Meals
               </div>
                 <Link href={"/meals"}>
-                  <Button className="absolute top-0 right-0 bg-cyan-400 cursor-pointer  shadow-[-6px_6px_18px_rgba(0,255,255,0.15)] shadow-cyan-300 w-16 text-center" size={"icon"}>Meals</Button>
+                  <Button className="absolute top-0 right-0 bg-cyan-400 cursor-pointer  shadow-md shadow-cyan-300 w-16 text-center" size={"icon"}>Meals</Button>
                 </Link>
             </div>
             <div className="relative">
-              <div className=" md:w-[130px] w-[170px] bg-card md:h-[150px] h-[170px] rounded-xl flex justify-end items-end overflow-hidden text-sm font-bold px-4 py-2 relative text-foreground
+              <div className=" md:w-[130px] w-[170px] bg-card md:h-[150px] h-[170px] rounded-xl flex flex-col justify-end items-end overflow-hidden text-sm font-bold px-4 py-2 relative text-foreground 
               [clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_90,0_A_10,10_0,0,1_100,10_L_100,30_A_10,10_0,0,0_110,40_L_160,40_A_10,10_0,0,1_170,50_L_170,150_A_20,20_0,0,1_150,170_L_20,170_A_20,20_0,0,1_0,150_Z')]
               md:[clip-path:path('M_0,20_A_20,20_0,0,1_20,0_L_50,0_A_10,10_0,0,1_60,10_L_60,30_A_10,10_0,0,0_70,40_L_120,40_A_10,10_0,0,1_130,50_L_130,130_A_20,20_0,0,1_110,150_L_20,150_A_20,20_0,0,1_0,130_L_0,20_Z')]
               ">
+                <span className="font-extralight w-full text-center flex justify-center items-center"><Dumbbell className="w-15 h-15"/></span><br />
                 体 AI Fitness
               </div>
                 <Link href={"/fitnes"}>
-                  <Button className="absolute top-0 right-0 bg-violet-700 cursor-pointer shadow-[-6px_6px_18px_rgba(0,255,255,0.15)] shadow-violet-600 w-16 text-center"  size={"icon"}>Fitness</Button>
+                  <Button className="absolute top-0 right-0 bg-violet-700 cursor-pointer  shadow-md shadow-violet-600 w-16 text-center"  size={"icon"}>Fitness</Button>
                 </Link>
             </div>
           </div>
@@ -215,15 +207,26 @@ export default async function Home() {
           [clip-path:path('M_330,20_A_20,20_0,0,1_350,0_L_340,0_A_20,20_0,0,1_360,20_L_360,480_A_20,20_0,0,1_340,500_L_20,500_A_20,20_0,0,1_0,480_L_0,200_A_20,20_0,0,1_20,180_L_230,180_L_240,175_L_240,175_L_325,60_L_325,60_L_330,50_L_330,20_Z')]
           md:[clip-path:path('M_330,20_A_20,20_0,0,1_350,0_L_700,0_A_20,20_0,0,1_720,20_L_720,550_A_20,20_0,0,1_700,570_L_20,570_A_20,20_0,0,1_0,550_L_0,200_A_20,20_0,0,1_20,180_L_230,180_L_240,175_L_240,175_L_325,60_L_325,60_L_330,50_L_330,20_Z')]
         ">
-          <Image src={illustrationFitness} alt="illustration fitness " quality={80} width={720} height={570} style={{objectFit: 'cover'}} sizes="(min-width: 1024px) 720px, (min-width: 768px) 480px, 100vw" priority fetchPriority="high"  className="w-full absolute md:top-0 top-35"/>
-          <h1 className={`absolute bottom-10 md:right-10 right-25 md:text-8xl text-4xl font-bold italic text-foreground ${sterion.className}`}>NEUROFIT</h1>
+          <div className="w-full h-full">
+            <Image
+              src={illustrationFitness}
+              alt="illustration fitness"
+              width={750}      // set ke ukuran yang masuk akal
+              height={1324}
+              priority
+              fetchPriority="high"
+              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+              sizes="(min-width: 1024px) 720px, (min-width: 768px) 480px, 360px"
+              className="w-full absolute md:top-0 top-35 dark:brightness-110"
+            />
+          </div>
         </div>
         <div className="w-[300px] h-[150px] bg-card absolute top-0" style={{
           clipPath: 'path("M 0,20 A 20,20 0,0,1 20,0 L 280,0 A 20,20 0,0,1 300,20 L 300,50 L 295,60 L 230,145 L 220,150 L 20,150 A 20,20 0,0,1 0,130 L 0,20 Z")',
         }}>
           <div className="relative w-full h-full scale-75 opacity-85">
-            <Image src={futuristicIcon} loading="lazy" alt="futuristicIcon " width={300} height={150} style={{objectFit: 'cover'}} sizes="(min-width: 1024px) 360px, (min-width: 768px) 240px, 10vw" className="absolute scale-70 rotate-90 -translate-y-20 translate-x-20 "/>
-            <Image src={japaneseText} loading="lazy" alt="Japanese Icon " width={300} height={150} style={{objectFit: 'cover'}} sizes="(min-width: 1024px) 360px, (min-width: 768px) 240px, 10vw" className="absolute scale-70 -translate-y-17  -translate-x-12 invert dark:invert-0"/>
+            <Image src={futuristicIcon} loading="lazy" alt="futuristicIcon " width={300} height={150} style={{objectFit: 'cover'}} className="absolute scale-70 rotate-90 -translate-y-20 translate-x-20 "/>
+            <Image src={japaneseText} loading="lazy" alt="Japanese Icon " width={300} height={150} style={{objectFit: 'cover'}} className="absolute scale-70 -translate-y-17  -translate-x-12 invert dark:invert-0"/>
           </div>
         </div>
       </div>
